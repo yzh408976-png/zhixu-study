@@ -689,6 +689,7 @@ function pwStrength(pw){
   for(var i=0;i<rules.length;i++)if(rules[i])n++;
   if(n===0)return{level:0,label:'',color:'#B7B2A6',met:0,ok:false};
   var tierColors=['#C7391B','#9A7B24','#2F6B5E','#3A5A8C'];
+  if(pw.length<6)return{level:n,label:'弱 · 不足 6 字符',color:tierColors[0],met:n,ok:false};
   if(n<4){
     var part=['弱','中','较强'][n-1];
     return{level:n,label:part+' · 还差 '+(4-n)+' 项',color:tierColors[n-1],met:n,ok:false};
@@ -698,7 +699,7 @@ function pwStrength(pw){
   if(pw.length>=12)q++;
   if(/[0-9]/.test(pw))q++;
   if(/[^A-Za-z0-9]{2,}/.test(pw))q++;
-  var lbl=q>=4?'极强':(q>=2?'强':'达标');
+  var lbl=q>=4?'极强':(q>=2?'强':'全部达标');
   var col=q>=4?'#3A5A8C':'#2F6B5E';
   return{level:4,label:lbl,color:col,met:4,ok:true};
 }
@@ -1024,7 +1025,7 @@ function updatePwMeter(){
     if(bars[i].style)bars[i].style.background=(pw&&i<st.level)?st.color:'var(--line)';
   }
   var ct=$('#pwMeterCount');
-  if(ct)ct.textContent='已满足 '+st.met+'/4'+(st.met===4?' · 全部达标':'');
+  if(ct)ct.textContent='已满足 '+st.met+'/4';
   var lb=$('#pwMeterLabel');
   if(lb){
     lb.textContent=pw?st.label:'';
@@ -1107,7 +1108,7 @@ function updateFpMeter(){
     if(bars[i].style)bars[i].style.background=(pw&&i<st.level)?st.color:'var(--line)';
   }
   var ct=$('#fpMeterCount');
-  if(ct)ct.textContent='已满足 '+st.met+'/4'+(st.met===4?' · 全部达标':'');
+  if(ct)ct.textContent='已满足 '+st.met+'/4';
   var lb=$('#fpMeterLabel');
   if(lb){
     lb.textContent=pw?st.label:'';
