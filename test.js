@@ -114,7 +114,7 @@ function runTests(){
   enterApp();
   chk('enterApp可安全调用',true,true);
   chk('海浪-共5层波带',SP_WAVES.length,5);
-  chk('海浪-波基线在下半屏',SP_WAVES[0].yBase>0.5&&SP_WAVES[4].yBase<=1,true);
+  chk('海浪-波基线覆盖屏面主体',SP_WAVES[0].yBase>0.3&&SP_WAVES[4].yBase<=1,true);
   chk('海浪-波基线从远到近递增',SP_WAVES[0].yBase<SP_WAVES[1].yBase&&SP_WAVES[3].yBase<SP_WAVES[4].yBase,true);
   chk('海浪-波函数输出在0~1区间',spWaveY(SP_WAVES[2],500,10)>0&&spWaveY(SP_WAVES[2],500,10)<1,true);
   chk('海浪-波浪随时间推进变化',spWaveY(SP_WAVES[0],500,10)!==spWaveY(SP_WAVES[0],500,11),true);
@@ -123,9 +123,12 @@ function runTests(){
   chk('海浪-近岸波透明度更高',SP_WAVES[4].alpha>SP_WAVES[0].alpha,true);
   var __sf1=spSparkleField(1200,800);
   chk('粼光-密度按面积自适应',spSparkleField(1200,800).length===__sf1.length,true);
-  chk('粼光-1080p超过150点',spSparkleField(1920,1080).length>=150,true);
-  chk('粼光-小屏下限90点',spSparkleField(360,640).length,90);
-  chk('粼光-坐标在水域范围内',__sf1.every(function(s){return s.yr>=0.56&&s.yr<=0.98}),true);
+  chk('粼光-1080p超过280条',spSparkleField(1920,1080).length>=280,true);
+  chk('粼光-小屏下限120条',spSparkleField(360,640).length,120);
+  chk('粼光-横向光带遍布海面',__sf1.every(function(s){return s.yr>=0.40&&s.yr<=0.97}),true);
+  chk('粼光-为横向长条有半长参数',__sf1.every(function(s){return s.hl>=5&&s.hl<=25}),true);
+  chk('粼光-光带带微小倾角',__sf1.every(function(s){return Math.abs(s.rot)<=0.11}),true);
+  chk('粼光-光带横向漂移有界',__sf1.every(function(s){return Math.abs(s.drift)>=5&&Math.abs(s.drift)<=21}),true);
   chk('涟漪-鼠标未激活不绘制',spMouse.active===false,true);
   chk('涟漪-鼠标状态对象存在',typeof spMouse.x==='number',true);
 
@@ -137,8 +140,8 @@ function runTests(){
   chk('真实海浪-波为三频叠加',spWaveY(SP_WAVES[0],500,10)!==spWaveY(SP_WAVES[0],500,10.001),true);
   chk('真实海浪-振幅显著大于旧版',SP_WAVES.every(function(w){return w.amp>=20}),true);
   chk('真实海浪-坡度函数对称可逆',Math.abs(spWaveSlope(SP_WAVES[1],500,10)+spWaveSlope(SP_WAVES[1],500,10))>0||true,true);
-  chk('真实海浪-波面在0.4~1.05内',spWaveY(SP_WAVES[2],300,5)>0.4&&spWaveY(SP_WAVES[2],300,5)<1.05,true);
-  chk('真实海浪-5层波覆盖下半屏',SP_WAVES[0].yBase<0.6&&SP_WAVES[4].yBase>0.9,true);
+  chk('真实海浪-波面在屏内0.05~1.1',spWaveY(SP_WAVES[2],300,5)>0.05&&spWaveY(SP_WAVES[2],300,5)<1.1,true);
+  chk('真实海浪-海面占屏下六成',SP_WAVES[0].yBase<0.42&&SP_WAVES[4].yBase>0.9,true);
 
   chk('粒子保留-色板为浅色适配5色',SPLASH_COLORS.length,5);
   chk('粒子保留-流场角度函数有界',Math.abs(spAngle(100,100,1))<=4,true);

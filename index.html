@@ -2036,23 +2036,25 @@ function spBindMouse(el){
 }
 var SPLASH_COLORS=[[199,57,27],[47,107,94],[154,123,36],[58,90,140],[35,39,47]];
 var SP_WAVES=[
-  {amp:26,len:0.0038,speed:0.42,yBase:0.58,alpha:0.34,glint:0.6},
-  {amp:22,len:0.0059,speed:-0.3,yBase:0.66,alpha:0.4,glint:0.75},
-  {amp:34,len:0.0026,speed:0.26,yBase:0.76,alpha:0.48,glint:0.9},
-  {amp:20,len:0.0072,speed:-0.5,yBase:0.86,alpha:0.58,glint:1.0},
-  {amp:28,len:0.0044,speed:0.34,yBase:0.95,alpha:0.7,glint:1.0}
+  {amp:26,len:0.0038,speed:0.42,yBase:0.38,alpha:0.34,glint:0.6},
+  {amp:22,len:0.0059,speed:-0.3,yBase:0.50,alpha:0.4,glint:0.75},
+  {amp:34,len:0.0026,speed:0.26,yBase:0.63,alpha:0.48,glint:0.9},
+  {amp:20,len:0.0072,speed:-0.5,yBase:0.78,alpha:0.58,glint:1.0},
+  {amp:28,len:0.0044,speed:0.34,yBase:0.93,alpha:0.7,glint:1.0}
 ];
 var SP_SPARKLES=null;
 function spSparkleField(w,h){
   if(SP_SPARKLES&&SP_SPARKLES.w===w&&SP_SPARKLES.h===h)return SP_SPARKLES.list;
-  var n=clamp(Math.round(w*h/8000),90,260),arr=[],i;
+  var n=clamp(Math.round(w*h/6800),120,320),arr=[],i;
   for(i=0;i<n;i++){
     arr.push({
       x:Math.random()*w,
-      yr:0.56+Math.random()*0.42,
+      yr:0.40+Math.random()*0.57,
       ph:Math.random()*6.2832,
       fr:0.8+Math.random()*2.2,
-      sz:0.8+Math.random()*1.9
+      hl:5+Math.random()*20,
+      rot:(Math.random()-0.5)*0.22,
+      drift:(Math.random()<0.5?-1:1)*(5+Math.random()*16)
     });
   }
   SP_SPARKLES={w:w,h:h,list:arr};
@@ -2115,9 +2117,25 @@ function spDrawSparkles(ctx,w,h,t){
     var tw=Math.max(0,Math.sin(t*s.fr+s.ph));
     if(tw<0.5)continue;
     var a=(tw-0.5)/0.5*(0.35+0.65*crest);
-    var y=s.yr*h+Math.sin(t*0.8+s.ph)*3;
-    ctx.fillStyle='rgba(255,255,255,'+(0.62*a).toFixed(3)+')';
-    ctx.beginPath();ctx.arc(s.x,y,s.sz,0,6.2832);ctx.fill();
+    var x=s.x+s.drift*t;
+    var mgn=s.hl+30;
+    if(x<-mgn)x=w+mgn-((-x-mgn)%(w+mgn*2));
+    else if(x>w+mgn)x=-mgn+((x-w-mgn)%(w+mgn*2));
+    var y=s.yr*h+Math.sin(t*0.8+s.ph)*2;
+    ctx.save();
+    ctx.translate(x,y);
+    ctx.rotate(s.rot);
+    ctx.fillStyle='rgba(255,255,255,'+(0.66*a).toFixed(3)+')';
+    ctx.beginPath();
+    ctx.ellipse(0,0,s.hl,1.1,0,0,6.2832);
+    ctx.fill();
+    if(s.hl>16){
+      ctx.fillStyle='rgba(255,255,255,'+(0.3*a).toFixed(3)+')';
+      ctx.beginPath();
+      ctx.ellipse(0,0,s.hl*1.5,2.4,0,0,6.2832);
+      ctx.fill();
+    }
+    ctx.restore();
   }
 }
 function spChaseForce(p,dx,dy){
