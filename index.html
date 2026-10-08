@@ -140,6 +140,13 @@ input,select{font-family:inherit;font-size:14px;color:var(--ink)}
 .mini-stat{border:1px solid var(--line);border-radius:var(--r);padding:8px 14px;background:var(--paper);text-align:center}
 .mini-stat .v{font-family:var(--font-display);font-weight:900;font-size:19px;color:var(--ink);font-variant-numeric:tabular-nums}
 .mini-stat .k{font-size:11px;color:var(--ink-faint)}
+.motto-card{
+  border:1px dashed var(--line-strong);border-radius:var(--r);background:linear-gradient(120deg,rgba(199,57,27,.05),rgba(47,107,94,.05));
+  padding:12px 18px;font-family:var(--font-display);font-size:15px;color:var(--ink);letter-spacing:.08em;
+  display:flex;align-items:baseline;gap:6px;flex-wrap:wrap;margin-bottom:18px;
+}
+.motto-mark{color:var(--cinnabar);font-weight:900}
+.motto-src{font-family:var(--font-body);font-size:12px;color:var(--ink-faint);letter-spacing:.02em}
 .firstwin{color:var(--pine);border-color:#A8C4BB;background:var(--pine-wash)}
 
 .energy-card{padding:18px 22px 12px;margin-bottom:22px}
@@ -323,6 +330,12 @@ input:focus{border-color:var(--cinnabar)}
 .auth-links{display:flex;justify-content:space-between;margin-top:14px;font-size:12.5px;gap:10px;flex-wrap:wrap}
 .auth-links button{color:var(--ink-faint);text-decoration:underline dotted}
 .auth-links button:hover{color:var(--cinnabar-deep)}
+.auth-links .fp-btn{color:var(--cinnabar-deep)}
+.pw-rule{font-size:11.5px;color:var(--ink-faint);margin-top:5px;line-height:1.6}
+.pw-rule b{color:var(--ink-soft);font-weight:500}
+.fp-steps{font-size:13px;line-height:1.9;color:var(--ink-soft)}
+.fp-steps b{color:var(--ink)}
+.fp-steps .num{font-family:var(--font-num);color:var(--cinnabar-deep);font-weight:700}
 .auth-note{margin-top:16px;font-size:11.5px;color:var(--ink-faint);line-height:1.7;border-top:1px dashed var(--line-strong);padding-top:12px}
 #acctBox{display:none}
 .acct-chip{display:flex;align-items:center;gap:9px;font-size:12px;color:var(--ink-soft);margin-bottom:12px}
@@ -485,7 +498,7 @@ input:focus{border-color:var(--cinnabar)}
         <div class="acct-chip" id="acctBox"></div>
         <div class="streak-chip">
         <span class="streak-n" id="streakN">0</span>
-        <span>天连击<br><span style="font-size:11px;color:var(--ink-faint)">序而不辍，功不唐捐</span></span>
+        <span>天连击</span>
       </div>
     </div>
   </aside>
@@ -649,6 +662,14 @@ function sha256Sync(ascii){
 }
 function pwHash(pw,salt){return sha256Sync(unescape(encodeURIComponent(salt+'|'+pw)))}
 function validateQQEmail(v){return /^[0-9]{5,12}@qq\.com$/i.test(String(v||'').trim())}
+function validatePw(pw){
+  pw=String(pw||'');
+  if(pw.length<6)return{ok:false,msg:'密码至少需要 6 个字符'};
+  if(!/[a-z]/.test(pw))return{ok:false,msg:'密码需包含小写英文字母'};
+  if(!/[A-Z]/.test(pw))return{ok:false,msg:'密码需包含大写英文字母'};
+  if(!/[^A-Za-z0-9]/.test(pw))return{ok:false,msg:'密码需包含特殊符号（如 !@#$% 等）'};
+  return{ok:true};
+}
 function getAccounts(){
   try{var a=JSON.parse(localStorage.getItem(ACCOUNTS_KEY));return(a&&typeof a==='object'&&!Array.isArray(a))?a:{}}
   catch(e){return{}}
@@ -657,7 +678,8 @@ function putAccounts(a){localStorage.setItem(ACCOUNTS_KEY,JSON.stringify(a))}
 function registerAccount(email,pw){
   email=String(email||'').trim().toLowerCase();
   if(!validateQQEmail(email))return{err:'请输入正确的 QQ 邮箱（数字 @qq.com）'};
-  if(String(pw||'').length<6)return{err:'密码至少需要 6 位'};
+  var vpw=validatePw(pw);
+  if(!vpw.ok)return{err:vpw.msg};
   var accts=getAccounts();
   if(accts[email])return{err:'该邮箱已注册，请直接登录'};
   var curEmail=sessionEmail();
@@ -681,6 +703,8 @@ function loginAccount(email,pw){
   email=String(email||'').trim().toLowerCase();
   var a=getAccounts()[email];
   if(!a)return{err:'该邮箱尚未注册'};
+  var vpw=validatePw(pw);
+  if(!vpw.ok)return{err:vpw.msg};
   if(pwHash(pw,a.salt)!==a.hash)return{err:'密码不正确'};
   setSession(email);
   return{ok:true,email:email};
@@ -922,12 +946,14 @@ function renderAuth(){
     '</div>'+
     '<div class="auth-err" id="authErr"></div>'+
     '<div class="auth-field"><label>QQ 邮箱</label><input type="text" id="authEmail" placeholder="123456789@qq.com" autocomplete="username"></div>'+
-    '<div class="auth-field"><label>密码'+(isReg?'（至少 6 位）':'')+'</label><input type="password" id="authPw" placeholder="请输入密码" autocomplete="'+(isReg?'new-password':'current-password')+'"></div>'+
+    '<div class="auth-field"><label>密码</label><input type="password" id="authPw" placeholder="请输入密码" autocomplete="'+(isReg?'new-password':'current-password')+'"></div>'+
     (isReg?'<div class="auth-field"><label>确认密码</label><input type="password" id="authPw2" placeholder="再次输入密码" autocomplete="new-password"></div>':'')+
+    (isReg?'<p class="pw-rule">密码要求：<b>至少 6 个字符</b>，需包含<b>大写字母、小写字母和特殊符号</b>（如 Abc!23）</p>':'')+
     '<button class="btn btn-primary" style="width:100%;justify-content:center;margin-top:4px" data-act="auth-submit">'+(isReg?'注册并进入':'登 录')+'</button>'+
     '<div class="auth-links">'+
-      '<button data-act="auth-guest">先逛逛 · 游客模式</button>'+
-      '<button data-act="auth-mode" data-m="'+(isReg?'login':'register')+'">'+(isReg?'已有账号？去登录':'没有账号？去注册')+'</button>'+
+      (isReg
+        ?'<button data-act="auth-guest">先逛逛 · 游客模式</button><button data-act="auth-mode" data-m="login">已有账号？去登录</button>'
+        :'<button class="fp-btn" data-act="auth-forgot">忘记密码？</button><button data-act="auth-guest">先逛逛 · 游客模式</button><button data-act="auth-mode" data-m="register">没有账号？去注册</button>')+
     '</div>'+
     '<div class="auth-note">本账号体系为本机实现：密码经 SHA-256 加盐哈希后仅存于本机浏览器，不上传任何服务器；同一浏览器内多账号数据相互隔离，更换设备需重新注册。</div>'+
   '</div>';
@@ -970,6 +996,50 @@ function authGuest(){
   switchView('today');
   if(!state.onboarded)setTimeout(openOnboarding,300);
   toast('以游客模式进入 · 数据仍保存在本机');
+}
+function openForgotPw(){
+  openModal(
+    '<h3>重置密码</h3>'+
+    '<div class="m-body">'+
+      '<p style="font-size:13px;color:var(--ink-soft);margin-bottom:12px">本账号体系为本机实现，无服务器可发验证邮件，重置方式如下：</p>'+
+      '<div class="fp-steps">'+
+        '<div><span class="num">1</span> 输入注册的 <b>QQ 邮箱</b>确认身份</div>'+
+        '<div><span class="num">2</span> 设置 <b>新密码</b>（规则与注册一致）</div>'+
+        '<div><span class="num">3</span> 原密码作废，学习数据完整保留</div>'+
+      '</div>'+
+      '<div class="auth-field" style="margin-top:14px"><label>QQ 邮箱</label><input type="text" id="fpEmail" placeholder="123456789@qq.com"></div>'+
+      '<div class="auth-field"><label>新密码</label><input type="password" id="fpPw" placeholder="至少6字符，含大小写字母和特殊符号" autocomplete="new-password"></div>'+
+      '<div class="auth-field"><label>确认新密码</label><input type="password" id="fpPw2" placeholder="再次输入新密码" autocomplete="new-password"></div>'+
+      '<div class="auth-err show" id="fpErr" style="display:none"></div>'+
+    '</div>'+
+    '<div class="m-actions"><button class="btn btn-ghost" data-act="close-modal">取消</button><button class="btn btn-primary" id="fpOkBtn">重置密码</button></div>'
+  );
+  var b=$('#fpOkBtn');
+  if(b)b.addEventListener('click',resetPw);
+}
+function fpErr(msg){
+  var e=$('#fpErr');
+  if(e){e.textContent=msg;e.style.display=msg?'block':'none'}
+}
+function resetPw(){
+  var emEl=$('#fpEmail'),pwEl=$('#fpPw'),pw2El=$('#fpPw2');
+  var em=emEl?String(emEl.value||'').trim():'';
+  var pw=pwEl?String(pwEl.value||''):'';
+  var pw2=pw2El?String(pw2El.value||''):'';
+  if(!validateQQEmail(em)){fpErr('请输入正确的 QQ 邮箱（数字 @qq.com）');return}
+  var a=getAccounts();
+  if(!a[em]){fpErr('该邮箱尚未注册，请先注册账号');return}
+  var vpw=validatePw(pw);
+  if(!vpw.ok){fpErr(vpw.msg);return}
+  if(pw!==pw2){fpErr('两次输入的新密码不一致');return}
+  var salt=Math.random().toString(36).slice(2,10)+Date.now().toString(36);
+  a[em].salt=salt;a[em].hash=pwHash(pw,salt);
+  putAccounts(a);
+  closeModal();
+  var emIn=$('#authEmail');
+  if(emIn)emIn.value=em;
+  authMode='login';renderAuth();
+  toast('密码已重置，请用新密码登录');
 }
 function logoutAccount(){
   save();
@@ -1139,6 +1209,7 @@ function renderToday(){
         '<div class="mini-stat'+(openerDone?' firstwin':'')+'"><div class="v">'+(openerDone?'达成':'待战')+'</div><div class="k">今日首胜</div></div>'+
       '</div>'+
     '</div>'+
+    '<div class="motto-card"><span class="motto-mark">「</span>序而不辍，功不唐捐<span class="motto-mark">」</span><span class="motto-src">—— 打卡不停，所下的功夫都不会白费</span></div>'+
     '<div class="energy-card card"><div class="energy-head">'+
       '<span class="energy-title">全天能量曲线</span><span class="muted">'+chronoTxt+' · 色块为任务块所处能量位置，攻坚块对齐峰值</span></div>'+
       energySVG(plan)+'</div>'+
@@ -1718,6 +1789,7 @@ document.addEventListener('click',function(e){
   if(act==='auth-mode'){authMode=el.getAttribute('data-m');renderAuth();return}
   if(act==='auth-submit'){authSubmit();return}
   if(act==='auth-guest'){authGuest();return}
+  if(act==='auth-forgot'){openForgotPw();return}
   if(act==='logout'){logoutAccount();return}
   if(act==='del-account'){deleteAccount();return}
   if(act==='show-auth'){showAuth('login');return}
