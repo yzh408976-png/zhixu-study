@@ -301,6 +301,34 @@ input:focus{border-color:var(--cinnabar)}
 @keyframes blink{0%,80%,100%{opacity:.25}40%{opacity:1}}
 .field-lbl{display:block;font-size:12.5px;color:var(--ink-soft);margin:12px 0 5px}
 
+/* ---------- 账号登录 ---------- */
+#auth{position:fixed;inset:0;z-index:85;background:var(--paper);display:flex;align-items:center;justify-content:center;transition:opacity .45s ease,visibility .45s;padding:20px}
+#auth.hide{opacity:0;visibility:hidden;pointer-events:none}
+.auth-card{width:400px;max-width:100%;padding:30px 32px 24px}
+.auth-seal{
+  width:44px;height:44px;background:var(--cinnabar);color:#FDF8EE;border-radius:9px;
+  display:flex;align-items:center;justify-content:center;font-family:var(--font-display);font-weight:900;font-size:23px;
+  margin:0 auto 12px;box-shadow:inset 0 0 0 2px rgba(253,248,238,.35),0 6px 14px -8px rgba(162,45,18,.7);transform:rotate(-3deg);
+}
+.auth-title{font-family:var(--font-display);font-size:24px;font-weight:900;letter-spacing:.18em;text-indent:.18em;text-align:center}
+.auth-sub{font-size:12px;color:var(--ink-faint);text-align:center;margin-top:3px;letter-spacing:.05em}
+.auth-tabs{display:flex;border:1px solid var(--line-strong);border-radius:var(--r);overflow:hidden;margin:18px 0 16px}
+.auth-tab{flex:1;padding:9px;font-size:14px;font-weight:500;color:var(--ink-soft);background:var(--card);transition:all .15s;letter-spacing:.2em;text-indent:.2em}
+.auth-tab.on{background:var(--cinnabar);color:#FDF8EE}
+.auth-field{margin-bottom:12px}
+.auth-field label{display:block;font-size:12.5px;color:var(--ink-soft);margin-bottom:5px}
+.auth-field input{width:100%}
+.auth-err{display:none;font-size:12.5px;color:var(--cinnabar-deep);background:var(--cinnabar-wash);border:1px solid #E4B8AA;border-radius:8px;padding:7px 12px;margin-bottom:12px;line-height:1.6}
+.auth-err.show{display:block}
+.auth-links{display:flex;justify-content:space-between;margin-top:14px;font-size:12.5px;gap:10px;flex-wrap:wrap}
+.auth-links button{color:var(--ink-faint);text-decoration:underline dotted}
+.auth-links button:hover{color:var(--cinnabar-deep)}
+.auth-note{margin-top:16px;font-size:11.5px;color:var(--ink-faint);line-height:1.7;border-top:1px dashed var(--line-strong);padding-top:12px}
+#acctBox{display:none}
+.acct-chip{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--ink-soft);margin-bottom:12px;flex-wrap:wrap}
+.acct-chip .em{font-family:var(--font-num);font-size:12px;background:var(--paper);border:1px solid var(--line);border-radius:999px;padding:2px 10px}
+.acct-chip button{color:var(--cinnabar-deep);font-size:12px;text-decoration:underline dotted}
+
 /* ---------- 弹窗 / Toast ---------- */
 .modal-mask{
   position:fixed;inset:0;background:rgba(35,39,47,.42);backdrop-filter:blur(3px);
@@ -421,9 +449,10 @@ input:focus{border-color:var(--cinnabar)}
       <span class="sp-chip">AI 学习教练</span>
     </div>
     <button class="btn btn-primary sp-enter" data-act="enter-app">进入系统</button>
-    <p class="sp-foot">数据仅存本机浏览器 · 无需注册登录 · 按回车亦可进入</p>
+    <p class="sp-foot">数据仅存本机浏览器 · QQ 邮箱注册登录 · 按回车亦可进入</p>
   </div>
 </div>
+<div id="auth" class="hide"></div>
 <div id="app">
   <aside id="sidebar">
     <div class="brand">
@@ -435,7 +464,8 @@ input:focus{border-color:var(--cinnabar)}
     </div>
     <nav id="nav"></nav>
     <div class="side-foot">
-      <div class="streak-chip">
+        <div class="acct-chip" id="acctBox"></div>
+        <div class="streak-chip">
         <span class="streak-n" id="streakN">0</span>
         <span>天连击<br><span style="font-size:11px;color:var(--ink-faint)">序而不辍，功不唐捐</span></span>
       </div>
@@ -524,9 +554,119 @@ var TYPES={
 };
 
 /* ================= 状态 ================= */
-var KEY='zhixu_v1';
+var BASE_KEY='zhixu_v1';
+var ACCOUNTS_KEY='zhixu_accounts_v1';
+var SESSION_KEY='zhixu_session_v1';
+function sessionEmail(){
+  try{var s=JSON.parse(localStorage.getItem(SESSION_KEY));return(s&&s.email)?String(s.email):null}
+  catch(e){return null}
+}
+function setSession(email){
+  if(email)localStorage.setItem(SESSION_KEY,JSON.stringify({email:email,ts:Date.now()}));
+  else localStorage.setItem(SESSION_KEY,JSON.stringify({guest:true,ts:Date.now()}));
+}
+function clearSession(){localStorage.removeItem(SESSION_KEY)}
+function dataKey(){var e=sessionEmail();return e?('zhixu_u_'+e):BASE_KEY}
+var KEY=dataKey();
 var DEF={profile:null,subjects:[],plans:{},completions:{},learnedLog:[],streak:{last:'',n:0},onboarded:false,aiConfig:null};
 var state=loadState();
+function switchStorage(){KEY=dataKey();state=loadState()}
+
+/* ================= 账号体系（本机账号） ================= */
+function sha256Sync(ascii){
+  function rr(v,a){return(v>>>a)|(v<<(32-a))}
+  var maxWord=Math.pow(2,32),i,j,result='';
+  var words=[],bitLen=ascii.length*8;
+  var hash=sha256Sync.h=sha256Sync.h||[];
+  var k=sha256Sync.k=sha256Sync.k||[];
+  var pc=k.length;
+  var isComp={};
+  for(var cand=2;pc<64;cand++){
+    if(!isComp[cand]){
+      for(i=0;i<313;i+=cand)isComp[i]=cand;
+      hash[pc]=(Math.pow(cand,.5)*maxWord)|0;
+      k[pc++]=(Math.pow(cand,1/3)*maxWord)|0;
+    }
+  }
+  ascii+='\x80';
+  while(ascii.length%64-56)ascii+='\x00';
+  for(i=0;i<ascii.length;i++){
+    j=ascii.charCodeAt(i);
+    if(j>>8)return'';
+    words[i>>2]|=j<<((3-i)%4)*8;
+  }
+  words[words.length]=(bitLen/maxWord)|0;
+  words[words.length]=bitLen;
+  for(j=0;j<words.length;){
+    var w=words.slice(j,j+=16);
+    var oldHash=hash;
+    hash=hash.slice(0,8);
+    for(i=0;i<64;i++){
+      var w15=w[i-15],w2=w[i-2];
+      var a=hash[0],e=hash[4];
+      var t1=hash[7]
+        +(rr(e,6)^rr(e,11)^rr(e,25))
+        +((e&hash[5])^((~e)&hash[6]))
+        +k[i]
+        +(w[i]=(i<16?w[i]:(
+          w[i-16]
+          +(rr(w15,7)^rr(w15,18)^(w15>>>3))
+          +w[i-7]
+          +(rr(w2,17)^rr(w2,19)^(w2>>>10))
+        )|0));
+      var t2=(rr(a,2)^rr(a,13)^rr(a,22))
+        +((a&hash[1])^(a&hash[2])^(hash[1]&hash[2]));
+      hash=[(t1+t2)|0].concat(hash);
+      hash[4]=(hash[4]+t1)|0;
+    }
+    for(i=0;i<8;i++)hash[i]=(hash[i]+oldHash[i])|0;
+  }
+  for(i=0;i<8;i++){
+    for(j=3;j+1;j--){
+      var b=(hash[i]>>(j*8))&255;
+      result+=((b<16)?0:'')+b.toString(16);
+    }
+  }
+  return result;
+}
+function pwHash(pw,salt){return sha256Sync(unescape(encodeURIComponent(salt+'|'+pw)))}
+function validateQQEmail(v){return /^[0-9]{5,12}@qq\.com$/i.test(String(v||'').trim())}
+function getAccounts(){
+  try{var a=JSON.parse(localStorage.getItem(ACCOUNTS_KEY));return(a&&typeof a==='object'&&!Array.isArray(a))?a:{}}
+  catch(e){return{}}
+}
+function putAccounts(a){localStorage.setItem(ACCOUNTS_KEY,JSON.stringify(a))}
+function registerAccount(email,pw){
+  email=String(email||'').trim().toLowerCase();
+  if(!validateQQEmail(email))return{err:'请输入正确的 QQ 邮箱（数字 @qq.com）'};
+  if(String(pw||'').length<6)return{err:'密码至少需要 6 位'};
+  var accts=getAccounts();
+  if(accts[email])return{err:'该邮箱已注册，请直接登录'};
+  var curEmail=sessionEmail();
+  var salt=Math.random().toString(36).slice(2,10)+Date.now().toString(36);
+  accts[email]={salt:salt,hash:pwHash(pw,salt),created:Date.now()};
+  putAccounts(accts);
+  var uk='zhixu_u_'+email;
+  if(!curEmail&&!localStorage.getItem(uk)){
+    var g=localStorage.getItem(BASE_KEY);
+    if(g){
+      try{
+        var gd=JSON.parse(g);
+        if(gd&&((gd.subjects&&gd.subjects.length)||gd.onboarded))localStorage.setItem(uk,JSON.stringify(gd));
+      }catch(e){}
+    }
+  }
+  setSession(email);
+  return{ok:true,email:email};
+}
+function loginAccount(email,pw){
+  email=String(email||'').trim().toLowerCase();
+  var a=getAccounts()[email];
+  if(!a)return{err:'该邮箱尚未注册'};
+  if(pwHash(pw,a.salt)!==a.hash)return{err:'密码不正确'};
+  setSession(email);
+  return{ok:true,email:email};
+}
 function loadState(){
   try{
     var s=JSON.parse(localStorage.getItem(KEY));
@@ -739,6 +879,105 @@ function confirmModal(text,onOk){
   $('#confirmOkBtn').addEventListener('click',function(){closeModal();onOk()});
 }
 
+/* ================= 登录界面 ================= */
+var authMode='login',lastAuthEmail='';
+function showAuth(mode){
+  authMode=mode||'login';
+  var el=$('#auth');
+  if(!el)return;
+  el.classList.remove('hide');
+  renderAuth();
+}
+function hideAuth(){var el=$('#auth');if(el)el.classList.add('hide')}
+function renderAuth(){
+  var el=$('#auth');
+  if(!el)return;
+  var isReg=authMode==='register';
+  el.innerHTML=
+  '<div class="card auth-card">'+
+    '<div class="auth-seal">序</div>'+
+    '<div class="auth-title">智序</div>'+
+    '<div class="auth-sub">科学学习编排引擎 · 账号登录</div>'+
+    '<div class="auth-tabs">'+
+      '<button class="auth-tab'+(isReg?'':' on')+'" data-act="auth-mode" data-m="login">登 录</button>'+
+      '<button class="auth-tab'+(isReg?' on':'')+'" data-act="auth-mode" data-m="register">注 册</button>'+
+    '</div>'+
+    '<div class="auth-err" id="authErr"></div>'+
+    '<div class="auth-field"><label>QQ 邮箱</label><input type="text" id="authEmail" placeholder="123456789@qq.com" autocomplete="username"></div>'+
+    '<div class="auth-field"><label>密码'+(isReg?'（至少 6 位）':'')+'</label><input type="password" id="authPw" placeholder="请输入密码" autocomplete="'+(isReg?'new-password':'current-password')+'"></div>'+
+    (isReg?'<div class="auth-field"><label>确认密码</label><input type="password" id="authPw2" placeholder="再次输入密码" autocomplete="new-password"></div>':'')+
+    '<button class="btn btn-primary" style="width:100%;justify-content:center;margin-top:4px" data-act="auth-submit">'+(isReg?'注册并进入':'登 录')+'</button>'+
+    '<div class="auth-links">'+
+      '<button data-act="auth-guest">先逛逛 · 游客模式</button>'+
+      '<button data-act="auth-mode" data-m="'+(isReg?'login':'register')+'">'+(isReg?'已有账号？去登录':'没有账号？去注册')+'</button>'+
+    '</div>'+
+    '<div class="auth-note">本账号体系为本机实现：密码经 SHA-256 加盐哈希后仅存于本机浏览器，不上传任何服务器；同一浏览器内多账号数据相互隔离，更换设备需重新注册。</div>'+
+  '</div>';
+  var em=$('#authEmail');
+  if(em){
+    if(lastAuthEmail)em.value=lastAuthEmail;
+    if(typeof em.focus==='function')em.focus();
+  }
+}
+function authError(msg){
+  var e=$('#authErr');
+  if(e){e.textContent=msg;e.classList.add('show')}
+}
+function authSubmit(){
+  var emEl=$('#authEmail'),pwEl=$('#authPw'),pw2El=$('#authPw2');
+  var em=emEl?String(emEl.value||'').trim():'';
+  var pw=pwEl?String(pwEl.value||''):'';
+  lastAuthEmail=em;
+  var res;
+  if(authMode==='register'){
+    var pw2=pw2El?String(pw2El.value||''):'';
+    if(pw!==pw2){authError('两次输入的密码不一致');return}
+    res=registerAccount(em,pw);
+  }else{
+    res=loginAccount(em,pw);
+  }
+  if(res&&res.err){authError(res.err);return}
+  switchStorage();
+  hideAuth();
+  renderNav();
+  switchView('today');
+  if(!state.onboarded)setTimeout(openOnboarding,300);
+  toast(authMode==='register'?'注册成功，欢迎加入智序':'欢迎回来，'+res.email);
+}
+function authGuest(){
+  setSession(null);
+  switchStorage();
+  hideAuth();
+  renderNav();
+  switchView('today');
+  if(!state.onboarded)setTimeout(openOnboarding,300);
+  toast('以游客模式进入 · 数据仍保存在本机');
+}
+function logoutAccount(){
+  save();
+  clearSession();
+  switchStorage();
+  renderNav();
+  showAuth('login');
+  toast('已退出登录');
+}
+function deleteAccount(){
+  var em=sessionEmail();
+  if(!em){toast('当前为游客模式，无账号可注销');return}
+  confirmModal('注销账号 '+em+'？该账号在本机的全部数据将被删除，无法恢复。',function(){
+    localStorage.removeItem('zhixu_u_'+em);
+    var a=getAccounts();
+    delete a[em];
+    putAccounts(a);
+    clearSession();
+    switchStorage();
+    renderNav();
+    switchView('today');
+    showAuth('login');
+    toast('账号已注销');
+  });
+}
+
 /* ================= 完成逻辑 ================= */
 function doneSet(d){return new Set(state.completions[d]||[])}
 function updateStreak(d){
@@ -794,6 +1033,17 @@ function renderNav(){
     t+='<button class="tab-item'+act+'" data-act="nav" data-v="'+n.id+'">'+n.icon+'<span>'+n.label+'</span></button>';
   }
   nav.innerHTML=h;tb.innerHTML=t;
+  var ab=$('#acctBox');
+  if(ab){
+    var em=sessionEmail();
+    if(em){
+      ab.style.display='flex';
+      ab.innerHTML='<span class="em">'+esc(em)+'</span><button data-act="logout">退出</button>';
+    }else{
+      ab.style.display='none';
+      ab.innerHTML='';
+    }
+  }
 }
 function switchView(v){
   curView=v;
@@ -1018,11 +1268,23 @@ function renderProfile(){
     optCard('rhythm',50,'深度节奏','50 分钟专注 + 10 分钟休息',p.rhythm)+
   '</div><p class="muted" style="margin-top:12px">两种节奏均有研究支持结构化休息的价值，按个人专注力上限选择即可。</p></div>';
 
+  var acctEmail=sessionEmail();
+  html+='<div class="pf-card card"><h3>账号</h3>'+
+    '<p style="font-size:13.5px;color:var(--ink-soft);margin-bottom:12px;line-height:1.7">'+
+    (acctEmail
+      ?'当前账号：<b class="num">'+esc(acctEmail)+'</b><br>数据与该账号绑定，仅存本机浏览器。'
+      :'当前为游客模式 — 数据仅保存在本机。注册 QQ 邮箱账号后，可与其他访客的数据相互隔离。')+
+    '</p><div style="display:flex;gap:10px;flex-wrap:wrap">'+
+    (acctEmail
+      ?'<button class="btn btn-ghost" data-act="logout">退出登录</button><button class="btn btn-danger" data-act="del-account">注销本机账号</button>'
+      :'<button class="btn btn-primary" data-act="show-auth">注册 / 登录</button>')+
+  '</div></div>';
+
   html+='<div class="pf-card card"><h3>数据管理</h3><div style="display:flex;gap:10px;flex-wrap:wrap">'+
     '<button class="btn btn-ghost" data-act="export">导出数据 (JSON)</button>'+
     '<button class="btn btn-ghost" data-act="rerun-ob">重跑设置向导</button>'+
     '<button class="btn btn-danger" data-act="wipe">清空全部数据</button>'+
-  '</div><p class="muted" style="margin-top:12px">所有数据仅保存在本机浏览器 localStorage，不上传任何服务器。</p></div>';
+  '</div><p class="muted" style="margin-top:12px">所有数据仅保存在本机浏览器 localStorage（按账号隔离），不上传任何服务器。</p></div>';
 
   html+='<div style="display:flex;gap:10px"><button class="btn btn-primary" data-act="save-profile">保存习惯设置</button></div></div>';
   view.innerHTML=html;
@@ -1430,6 +1692,12 @@ document.addEventListener('click',function(e){
     });
     return;
   }
+  if(act==='auth-mode'){authMode=el.getAttribute('data-m');renderAuth();return}
+  if(act==='auth-submit'){authSubmit();return}
+  if(act==='auth-guest'){authGuest();return}
+  if(act==='logout'){logoutAccount();return}
+  if(act==='del-account'){deleteAccount();return}
+  if(act==='show-auth'){showAuth('login');return}
   if(act==='enter-app'){enterApp();return}
   if(act==='ai-config'){openAIConfig();return}
   if(act==='save-ai'){
@@ -1611,6 +1879,7 @@ function hideSplash(){
 }
 function enterApp(){
   hideSplash();
+  if(!localStorage.getItem(SESSION_KEY)){showAuth('login');return}
   if(!state.onboarded)setTimeout(openOnboarding,380);
 }
 
@@ -1623,7 +1892,10 @@ function boot(){
 document.addEventListener('keydown',function(e){
   if(e.key!=='Enter'&&e.key!=='Escape')return;
   var el=$('#splash');
-  if(el&&el.classList&&el.classList.contains&&!el.classList.contains('hide'))enterApp();
+  if(el&&el.classList&&el.classList.contains&&!el.classList.contains('hide')){enterApp();return}
+  if(e.key!=='Enter')return;
+  var au=$('#auth');
+  if(au&&au.classList&&au.classList.contains&&!au.classList.contains('hide'))authSubmit();
 });
 boot();
 </script>

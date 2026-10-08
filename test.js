@@ -116,6 +116,27 @@ function runTests(){
   chk('粒子流场角度函数有界',Math.abs(spAngle(100,100,1))<=4,true);
   chk('启动页粒子色板为浅色适配5色',SPLASH_COLORS.length,5);
 
+  chk('sha256标准向量abc',sha256Sync('abc'),'ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad');
+  chk('sha256多块长输入稳定',sha256Sync(sha256Sync('abc'))===sha256Sync(sha256Sync('abc')),true);
+  chk('QQ邮箱校验-合法',validateQQEmail('123456789@qq.com'),true);
+  chk('QQ邮箱校验-拒绝非QQ',validateQQEmail('abc@gmail.com'),false);
+  chk('QQ邮箱校验-拒绝过短数字',validateQQEmail('123@qq.com'),false);
+  chk('QQ邮箱校验-拒绝非数字',validateQQEmail('abcd12345@qq.com'),false);
+  chk('注册-密码过短被拒',registerAccount('123456789@qq.com','123').err!==undefined,true);
+  var __reg=registerAccount('123456789@qq.com','test123');
+  chk('注册成功',__reg.ok===true,true);
+  chk('账号已登记且密码为哈希',getAccounts()['123456789@qq.com']&&getAccounts()['123456789@qq.com'].hash.indexOf('test')<0,true);
+  chk('重复注册被拒',registerAccount('123456789@qq.com','test123').err!==undefined,true);
+  chk('错误密码登录被拒',loginAccount('123456789@qq.com','wrongpw').err!==undefined,true);
+  chk('未注册邮箱登录被拒',loginAccount('987654321@qq.com','test123').err!==undefined,true);
+  chk('正确密码登录',loginAccount('123456789@qq.com','test123').ok===true,true);
+  chk('登录后数据键切换',dataKey(),'zhixu_u_123456789@qq.com');
+  chk('游客数据迁移到新账号',!!localStorage.getItem('zhixu_u_123456789@qq.com'),true);
+  setSession(null);
+  chk('游客会话数据键回落',dataKey(),'zhixu_v1');
+  clearSession();
+  chk('清除会话后无登录',sessionEmail(),null);
+
   console.log(fails===0?'=== 全部测试通过 ===':'=== '+fails+' 项测试失败 ===');
   process.exit(fails===0?0:1);
 }
