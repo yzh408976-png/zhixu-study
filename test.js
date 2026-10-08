@@ -154,14 +154,14 @@ function runTests(){
   chk('QQ邮箱校验-拒绝非QQ',validateQQEmail('abc@gmail.com'),false);
   chk('QQ邮箱校验-拒绝过短数字',validateQQEmail('123@qq.com'),false);
   chk('QQ邮箱校验-拒绝非数字',validateQQEmail('abcd12345@qq.com'),false);
-  chk('注册-密码过短被拒',registerAccount('123456789@qq.com','123').err!==undefined,true);
-  var __reg=registerAccount('123456789@qq.com','test123');
+  chk('注册-密码过短被拒',registerAccount('123456789@qq.com','aB!').err!==undefined,true);
+  var __reg=registerAccount('123456789@qq.com','Test!123');
   chk('注册成功',__reg.ok===true,true);
-  chk('账号已登记且密码为哈希',getAccounts()['123456789@qq.com']&&getAccounts()['123456789@qq.com'].hash.indexOf('test')<0,true);
-  chk('重复注册被拒',registerAccount('123456789@qq.com','test123').err!==undefined,true);
-  chk('错误密码登录被拒',loginAccount('123456789@qq.com','wrongpw').err!==undefined,true);
-  chk('未注册邮箱登录被拒',loginAccount('987654321@qq.com','test123').err!==undefined,true);
-  chk('正确密码登录',loginAccount('123456789@qq.com','test123').ok===true,true);
+  chk('账号已登记且密码为哈希',getAccounts()['123456789@qq.com']&&getAccounts()['123456789@qq.com'].hash.indexOf('Test')<0,true);
+  chk('重复注册被拒',registerAccount('123456789@qq.com','Test!123').err!==undefined,true);
+  chk('错误密码登录被拒',loginAccount('123456789@qq.com','Wrong!pw9').err!==undefined,true);
+  chk('未注册邮箱登录被拒',loginAccount('987654321@qq.com','Test!123').err!==undefined,true);
+  chk('正确密码登录',loginAccount('123456789@qq.com','Test!123').ok===true,true);
   chk('登录后数据键切换',dataKey(),'zhixu_u_123456789@qq.com');
   chk('游客数据迁移到新账号',!!localStorage.getItem('zhixu_u_123456789@qq.com'),true);
   setSession(null);
@@ -175,7 +175,7 @@ function runTests(){
   chk('游客/无会话→进入系统弹登录页',authMode,'login');
   chk('renderNav游客态安全渲染',typeof renderNav==='function',true);
   renderNav();
-  loginAccount('123456789@qq.com','test123');
+  loginAccount('123456789@qq.com','Test!123');
   authMode='register';
   enterApp();
   chk('已登录会话→免登录直达',authMode,'register');
@@ -185,6 +185,34 @@ function runTests(){
   chk('红点动画尊重减少动态偏好',/prefers-reduced-motion: reduce\)\{\.acct-ava\.guest::after\{animation:none\}\}/.test(html),true);
   chk('游客按钮含箭头引导',/acct-arrow/.test(html),true);
   chk('游客按钮可键盘聚焦有焦点态',/\.acct-login:hover,\.acct-login:focus-visible/.test(html),true);
+
+  chk('密码规则-短密码被拒',validatePw('aB!').ok,false);
+  chk('密码规则-纯小写被拒',validatePw('abcdef!').ok,false);
+  chk('密码规则-纯大写被拒',validatePw('ABCDEF!').ok,false);
+  chk('密码规则-无特殊符号被拒',validatePw('Abcdef').ok,false);
+  chk('密码规则-常见组合合法',validatePw('Abc!23').ok,true);
+  chk('密码规则-长强密码合法',validatePw('Zh!xu2026#Studying').ok,true);
+  var __vp=validatePw('abcdefg');
+  chk('密码规则-错误信息可读',typeof __vp.msg==='string'&&__vp.msg.indexOf('大写')>=0,true);
+
+  chk('注册-弱密码被拒',registerAccount('222222222@qq.com','test123').err!==undefined,true);
+  var __reg2=registerAccount('222222222@qq.com','Good!Pass1');
+  chk('注册-强密码成功',__reg2.ok===true,true);
+  chk('登录-弱密码格式被拒',loginAccount('222222222@qq.com','test123').err!==undefined,true);
+  chk('登录-强密码正确可登录',loginAccount('222222222@qq.com','Good!Pass1').ok===true,true);
+  chk('忘记密码-未注册邮箱不可重置',getAccounts()['333333333@qq.com']===undefined,true);
+  var __oldHash=getAccounts()['222222222@qq.com'].hash;
+  var __acct=getAccounts()['222222222@qq.com'];
+  var __nsalt='zz'+Math.random().toString(36).slice(2,8);
+  __acct.salt=__nsalt;__acct.hash=pwHash('New!Pass2',__nsalt);
+  var __a2=getAccounts();__a2['222222222@qq.com']=__acct;putAccounts(__a2);
+  chk('重置-旧密码失效',loginAccount('222222222@qq.com','Good!Pass1').err!==undefined,true);
+  chk('重置-新密码生效',loginAccount('222222222@qq.com','New!Pass2').ok===true,true);
+
+  chk('名言已迁至今日页打卡区上方',/motto-card/.test(html),true);
+  chk('侧栏连击不再含名言',/<span>天连击<\/span>/.test(html),true);
+  chk('登录页含忘记密码入口',/auth-forgot/.test(html),true);
+  chk('注册页展示密码规则提示',/至少 6 个字符/.test(html),true);
 
   console.log(fails===0?'=== 全部测试通过 ===':'=== '+fails+' 项测试失败 ===');
   process.exit(fails===0?0:1);
