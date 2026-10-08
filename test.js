@@ -258,6 +258,9 @@ function runTests(){
   chk('字母邮箱注册成功',registerAccount('studylife@qq.com','Good!Pass1').ok===true,true);
   chk('字母邮箱登录成功',loginAccount('studylife@qq.com','Good!Pass1').ok===true,true);
 
+  chk('启动页提示文案已按要求删除',html.indexOf('光标所至')<0,true);
+  chk('启动页脚样式已清理',html.indexOf('sp-foot')<0,true);
+
   console.log(fails===0?'=== 全部测试通过 ===':'=== '+fails+' 项测试失败 ===');
   process.exit(fails===0?0:1);
 }
