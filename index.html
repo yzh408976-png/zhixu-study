@@ -346,6 +346,11 @@ input:focus{border-color:var(--cinnabar)}
 .pw-meter-txt{display:flex;justify-content:space-between;font-size:11px;color:var(--ink-faint);margin-top:4px}
 .pw-meter-txt .pm-label{font-weight:700}
 .auth-note{margin-top:16px;font-size:11.5px;color:var(--ink-faint);line-height:1.7;border-top:1px dashed var(--line-strong);padding-top:12px}
+.auth-card.auth-flip{animation:authFlip .38s cubic-bezier(.22,.9,.36,1)}
+@keyframes authFlip{
+  0%{opacity:0;transform:translateX(26px) scale(.985)}
+  100%{opacity:1;transform:translateX(0) scale(1)}
+}
 #acctBox{display:none}
 .acct-chip{display:flex;align-items:center;gap:9px;font-size:12px;color:var(--ink-soft);margin-bottom:12px}
 .acct-ava{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13.5px;flex-shrink:0;font-family:var(--font-display);font-weight:700;position:relative}
@@ -1009,6 +1014,8 @@ function renderAuth(){
   }
   var pwEl=$('#authPw');
   if(pwEl&&typeof pwEl.addEventListener==='function')pwEl.addEventListener('input',updatePwMeter);
+  var card=el.querySelector('.auth-card');
+  if(card&&card.classList)card.classList.add('auth-flip');
 }
 function authError(msg){
   var e=$('#authErr');
@@ -1107,6 +1114,8 @@ function renderForgotAuth(el){
   }
   var fpe=$('#fpPw');
   if(fpe&&typeof fpe.addEventListener==='function')fpe.addEventListener('input',updateFpMeter);
+  var card=el.querySelector('.auth-card');
+  if(card&&card.classList)card.classList.add('auth-flip');
 }
 function updateFpMeter(){
   var pwEl=$('#fpPw');
