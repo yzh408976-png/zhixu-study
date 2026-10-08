@@ -151,9 +151,13 @@ function runTests(){
   chk('sha256标准向量abc',sha256Sync('abc'),'ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad');
   chk('sha256多块长输入稳定',sha256Sync(sha256Sync('abc'))===sha256Sync(sha256Sync('abc')),true);
   chk('QQ邮箱校验-合法',validateQQEmail('123456789@qq.com'),true);
+  chk('QQ邮箱校验-字母数字混合合法',validateQQEmail('study2026@qq.com'),true);
+  chk('QQ邮箱校验-纯字母合法',validateQQEmail('wangfang@qq.com'),true);
+  chk('QQ邮箱校验-下划线连字符合法',validateQQEmail('my_name-01@qq.com'),true);
   chk('QQ邮箱校验-拒绝非QQ',validateQQEmail('abc@gmail.com'),false);
-  chk('QQ邮箱校验-拒绝过短数字',validateQQEmail('123@qq.com'),false);
-  chk('QQ邮箱校验-拒绝非数字',validateQQEmail('abcd12345@qq.com'),false);
+  chk('QQ邮箱校验-拒绝过短',validateQQEmail('ab1@qq.com'),false);
+  chk('QQ邮箱校验-拒绝特殊符号开头',validateQQEmail('_abc1234@qq.com'),false);
+  chk('QQ邮箱校验-拒绝纯符号用户名',validateQQEmail('!!!!@@@@qq.com'),false);
   chk('注册-密码过短被拒',registerAccount('123456789@qq.com','aB!').err!==undefined,true);
   var __reg=registerAccount('123456789@qq.com','Test!123');
   chk('注册成功',__reg.ok===true,true);
@@ -213,6 +217,17 @@ function runTests(){
   chk('侧栏连击不再含名言',/<span>天连击<\/span>/.test(html),true);
   chk('登录页含忘记密码入口',/auth-forgot/.test(html),true);
   chk('注册页展示密码规则提示',/至少 6 个字符/.test(html),true);
+
+  chk('密码框上有要求提示卡',/密码输入要求/.test(html),true);
+  chk('密码框下有强弱条',/pw-meter-bar/.test(html),true);
+  chk('强弱四段颜色分级',pwStrength('Abc!23').level>=1&&pwStrength('Abcdef!2026@Study').level>=3,true);
+  chk('不合规密码强度归零',pwStrength('abc').level,0);
+  chk('不合规密码显示不合规',pwStrength('abc').label,'不合规');
+  chk('强密码返回强档以上',['强','极强'].indexOf(pwStrength('Zh!xu2026#Studying').label)>=0,true);
+  chk('极强档示例可达',pwStrength('Zh!!xu2026#Studying').label,'极强');
+  chk('强度分级单调递增',pwStrength('Abc!23').level<=pwStrength('Abcd!234').level,true);
+  chk('字母邮箱注册成功',registerAccount('studylife@qq.com','Good!Pass1').ok===true,true);
+  chk('字母邮箱登录成功',loginAccount('studylife@qq.com','Good!Pass1').ok===true,true);
 
   console.log(fails===0?'=== 全部测试通过 ===':'=== '+fails+' 项测试失败 ===');
   process.exit(fails===0?0:1);
