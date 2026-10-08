@@ -2142,10 +2142,76 @@ function spSprites(){
     g.fillStyle=grad;g.fillRect(0,0,48,48);
     arr.push(c);
   }
+  SP_SPARKLES={w:w,h:h,list:arr};
   return arr;
 }
-function spAngle(x,y,t){
-  return Math.sin(x*0.0015+t*0.3)*1.5+Math.cos(y*0.0012-t*0.23)*1.5+Math.sin((x+y)*0.0007+t*0.17)*0.8;
+function spWaveY(wv,x,t){
+  return wv.yBase+Math.sin(x*wv.len+t*wv.speed)*wv.amp*0.011+Math.sin(x*wv.len*2.3-t*wv.speed*1.7)*wv.amp*0.006;
+}
+function spDrawWaves(ctx,w,h,t){
+  var i,j,k;
+  for(i=0;i<SP_WAVES.length;i++){
+    var wv=SP_WAVES[i];
+    ctx.beginPath();
+    var first=true,seg=Math.max(6,Math.round(w/90));
+    for(j=0;j<=seg;j++){
+      var x=w*j/seg;
+      var y=spWaveY(wv,x,t)*h;
+      if(first){ctx.moveTo(x,y);first=false}
+      else ctx.lineTo(x,y);
+    }
+    ctx.lineTo(w,h);ctx.lineTo(0,h);ctx.closePath();
+    var g=ctx.createLinearGradient(0,h*wv.yBase-30,0,h);
+    g.addColorStop(0,'rgba(64,118,144,'+(wv.alpha*0.5)+')');
+    g.addColorStop(1,'rgba(96,152,170,'+(wv.alpha*0.24)+')');
+    ctx.fillStyle=g;ctx.fill();
+    ctx.strokeStyle='rgba(255,255,255,'+(0.24*wv.glint)+')';
+    ctx.lineWidth=1.2;
+    ctx.beginPath();first=true;
+    for(j=0;j<=seg;j++){
+      var x2=w*j/seg,y2=spWaveY(wv,x2,t)*h;
+      if(first){ctx.moveTo(x2,y2);first=false}
+      else ctx.lineTo(x2,y2);
+    }
+    ctx.stroke();
+  }
+}
+function spDrawSparkles(ctx,w,h,t){
+  var list=spSparkleField(w,h),i;
+  for(i=0;i<list.length;i++){
+    var s=list[i];
+    var tw=Math.max(0,Math.sin(t*s.fr+s.ph));
+    if(tw<0.55)continue;
+    var a=(tw-0.55)/0.45;
+    var y=s.yr*h+Math.sin(t*0.7+s.ph)*4;
+    ctx.fillStyle='rgba(255,255,255,'+(0.5*a).toFixed(3)+')';
+    ctx.beginPath();ctx.arc(s.x,y,s.sz,0,6.2832);ctx.fill();
+  }
+}
+function spDrawRipples(ctx,w,h,t){
+  if(!spMouse.active)return;
+  var mx=spMouse.x,my=spMouse.y;
+  var i,j;
+  for(i=0;i<3;i++){
+    var rr=((t*0.5+i*0.66)%1);
+    var rad=40+rr*130;
+    var al=(1-rr)*0.28;
+    ctx.strokeStyle='rgba(255,255,255,'+al.toFixed(3)+')';
+    ctx.lineWidth=1.4;
+    ctx.beginPath();
+    var seg=44;var ok=false;
+    for(j=0;j<=seg;j++){
+      var ang=6.2832*j/seg;
+      var x=mx+Math.cos(ang)*rad,y=my+Math.sin(ang)*rad*0.62;
+      if(x<-10||x>w+10||y<-10||y>h+10){ok=false;continue}
+      if(!ok){ctx.moveTo(x,y);ok=true}
+      else ctx.lineTo(x,y);
+    }
+    ctx.stroke();
+  }
+  ctx.strokeStyle='rgba(255,255,255,0.32)';
+  ctx.lineWidth=1.6;
+  ctx.beginPath();ctx.arc(mx,my,26,0,6.2832);ctx.stroke();
 }
 function spDustCount(w,h){return clamp(Math.round(w*h/13000),56,170)}
 var SP_METEOR_MAX=3;
