@@ -220,12 +220,19 @@ function runTests(){
 
   chk('密码框上有要求提示卡',/密码输入要求/.test(html),true);
   chk('密码框下有强弱条',/pw-meter-bar/.test(html),true);
-  chk('强弱四段颜色分级',pwStrength('Abc!23').level>=1&&pwStrength('Abcdef!2026@Study').level>=3,true);
-  chk('不合规密码强度归零',pwStrength('abc').level,0);
-  chk('不合规密码显示不合规',pwStrength('abc').label,'不合规');
+  chk('逐条点亮-空密码零段',pwStrength('').level,0);
+  chk('逐条点亮-仅大写亮一段',pwStrength('ABC').level,1);
+  chk('逐条点亮-长度加小写亮两段',pwStrength('abcdef').level,2);
+  chk('逐条点亮-长度小写大写亮三段',pwStrength('Abcdef').level,3);
+  chk('逐条点亮-四条全满足亮满',pwStrength('Abc!23').level,4);
+  chk('逐条点亮-段数随条件递增',pwStrength('ABC').level<pwStrength('abcdef').level&&pwStrength('abcdef').level<pwStrength('Abcdef').level&&pwStrength('Abcdef').level<pwStrength('Abcdef!').level,true);
+  chk('逐条点亮-计数元数据准确',pwStrength('Abcdef').met,3);
+  chk('未达标提示还差项数',pwStrength('Abcdef').label.indexOf('还差 1 项')>=0,true);
+  chk('四条达标文案切换',pwStrength('Abc!23').label,'达标');
+  chk('不合规密码不再误标强度',pwStrength('abc').ok,false);
   chk('强密码返回强档以上',['强','极强'].indexOf(pwStrength('Zh!xu2026#Studying').label)>=0,true);
   chk('极强档示例可达',pwStrength('Zh!!xu2026#Studying').label,'极强');
-  chk('强度分级单调递增',pwStrength('Abc!23').level<=pwStrength('Abcd!234').level,true);
+  chk('计数文案已接入界面',/已满足 '\+'?0?\/?4|pwMeterCount/.test(html),true);
   chk('字母邮箱注册成功',registerAccount('studylife@qq.com','Good!Pass1').ok===true,true);
   chk('字母邮箱登录成功',loginAccount('studylife@qq.com','Good!Pass1').ok===true,true);
 
