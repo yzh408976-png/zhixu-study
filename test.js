@@ -205,6 +205,14 @@ function runTests(){
   chk('登录-弱密码格式被拒',loginAccount('222222222@qq.com','test123').err!==undefined,true);
   chk('登录-强密码正确可登录',loginAccount('222222222@qq.com','Good!Pass1').ok===true,true);
   chk('忘记密码-未注册邮箱不可重置',getAccounts()['333333333@qq.com']===undefined,true);
+
+  chk('忘记密码-邮箱+新密码+确认三栏齐全',/id="fpEmail"/.test(html)&&/id="fpPw"/.test(html)&&/id="fpPw2"/.test(html),true);
+  chk('忘记密码-含强弱条逐条点亮',/fp-bar/.test(html)&&/fpMeterCount/.test(html),true);
+  chk('忘记密码-含要求提示卡',/新密码输入要求/.test(html),true);
+  chk('忘记密码-要求项变绿复用样式',/fpReqLen|fpReqSpec/.test(html),true);
+  chk('忘记密码-弱密码显示不足提示',pwStrength('Ab@c').label.indexOf('不足 6 字符')>=0,true);
+  chk('忘记密码-示例新密码全达标',pwStrength('Yan@123').label,'全部达标');
+
   var __oldHash=getAccounts()['222222222@qq.com'].hash;
   var __acct=getAccounts()['222222222@qq.com'];
   var __nsalt='zz'+Math.random().toString(36).slice(2,8);
