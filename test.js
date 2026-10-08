@@ -169,6 +169,17 @@ function runTests(){
   clearSession();
   chk('清除会话后无登录',sessionEmail(),null);
 
+  setSession(null);
+  authMode='register';
+  enterApp();
+  chk('游客/无会话→进入系统弹登录页',authMode,'login');
+  chk('renderNav游客态安全渲染',typeof renderNav==='function',true);
+  renderNav();
+  loginAccount('123456789@qq.com','test123');
+  authMode='register';
+  enterApp();
+  chk('已登录会话→免登录直达',authMode,'register');
+
   console.log(fails===0?'=== 全部测试通过 ===':'=== '+fails+' 项测试失败 ===');
   process.exit(fails===0?0:1);
 }
