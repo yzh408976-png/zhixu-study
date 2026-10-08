@@ -449,7 +449,7 @@ input:focus{border-color:var(--cinnabar)}
       <span class="sp-chip">AI 学习教练</span>
     </div>
     <button class="btn btn-primary sp-enter" data-act="enter-app">进入系统</button>
-    <p class="sp-foot">数据仅存本机浏览器 · QQ 邮箱注册登录 · 按回车亦可进入</p>
+    <p class="sp-foot">移动光标 · 粒子随行 · 按回车亦可进入</p>
   </div>
 </div>
 <div id="auth" class="hide"></div>
@@ -1800,6 +1800,29 @@ function renderTodayProgress(){
 /* ================= 启动页粒子 ================= */
 var splashRaf=0,splashRun=false;
 var SPLASH_COLORS=[[199,57,27],[47,107,94],[154,123,36],[58,90,140],[35,39,47]];
+var SP_CHASE_R=300;
+var spMouse={x:0,y:0,active:false,bound:false};
+function spBindMouse(el){
+  if(spMouse.bound||!el||typeof el.addEventListener!=='function')return;
+  spMouse.bound=true;
+  el.addEventListener('mousemove',function(e){
+    spMouse.x=e.clientX;spMouse.y=e.clientY;spMouse.active=true;
+  });
+  el.addEventListener('mouseleave',function(){spMouse.active=false});
+  el.addEventListener('touchmove',function(e){
+    if(e.touches&&e.touches[0]){spMouse.x=e.touches[0].clientX;spMouse.y=e.touches[0].clientY;spMouse.active=true}
+  },{passive:true});
+  el.addEventListener('touchend',function(){spMouse.active=false},{passive:true});
+}
+function spChaseForce(dx,dy){
+  var d=Math.sqrt(dx*dx+dy*dy);
+  if(d>SP_CHASE_R||d<0.0001)return null;
+  var nx=dx/d,ny=dy/d;
+  var fall=1-d/SP_CHASE_R;
+  var pull=0.06+fall*0.3;
+  var swirl=0.1*fall;
+  return[nx*pull-ny*swirl,ny*pull+nx*swirl];
+}
 function spSprites(){
   var arr=[],i;
   for(i=0;i<SPLASH_COLORS.length;i++){
@@ -1824,6 +1847,7 @@ function showSplash(){
   el.classList.remove('hide');
   var ctx=cv.getContext?cv.getContext('2d'):null;
   if(!ctx)return;
+  spBindMouse(el);
   var w=window.innerWidth||el.clientWidth||0,h=window.innerHeight||el.clientHeight||0;
   if(!w||!h)return;
   var dpr=Math.min(window.devicePixelRatio||1,2);
@@ -1857,7 +1881,13 @@ function showSplash(){
       var p=ps[j];
       var ang=spAngle(p.x,p.y,t);
       p.vx+=Math.cos(ang)*0.012;p.vy+=Math.sin(ang)*0.012;
+      if(spMouse.active){
+        var cf=spChaseForce(spMouse.x-p.x,spMouse.y-p.y);
+        if(cf){p.vx+=cf[0];p.vy+=cf[1]}
+      }
       p.vx*=0.97;p.vy*=0.97;
+      var spd=p.vx*p.vx+p.vy*p.vy;
+      if(spd>36){var sc=6/Math.sqrt(spd);p.vx*=sc;p.vy*=sc}
       p.x+=p.vx+Math.sin(t*0.6+p.r)*0.04;
       p.y+=p.vy+Math.cos(t*0.5+p.a*9)*0.04;
       if(p.x<-p.r)p.x=w+p.r;else if(p.x>w+p.r)p.x=-p.r;
@@ -1873,6 +1903,7 @@ function showSplash(){
 }
 function hideSplash(){
   splashRun=false;
+  spMouse.active=false;
   if(splashRaf&&typeof cancelAnimationFrame==='function')cancelAnimationFrame(splashRaf);
   var el=$('#splash');
   if(el)el.classList.add('hide');
