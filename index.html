@@ -1074,22 +1074,27 @@ function authGuest(){
   toast('以游客模式进入 · 数据仍保存在本机');
 }
 function openForgotPw(){
+  var reqHtml=
+    '<div class="pw-req">'+
+      '<div class="pw-req-t"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9.5"/><path d="M12 8v5M12 16.2v.4"/></svg>新密码输入要求</div>'+
+      '<ul>'+
+        '<li id="fpReqLen" data-pw-req>至少 6 个字符</li>'+
+        '<li id="fpReqLower" data-pw-req>包含小写英文字母 (a-z)</li>'+
+        '<li id="fpReqUpper" data-pw-req>包含大写英文字母 (A-Z)</li>'+
+        '<li id="fpReqSpec" data-pw-req>包含特殊符号 (如 !@#$%)</li>'+
+      '</ul>'+
+    '</div>';
   openModal(
     '<h3>重置密码</h3>'+
     '<div class="m-body">'+
-      '<p style="font-size:13px;color:var(--ink-soft);margin-bottom:12px">本账号体系为本机实现，无服务器可发验证邮件，重置方式如下：</p>'+
-      '<div class="fp-steps">'+
-        '<div><span class="num">1</span> 输入注册的 <b>QQ 邮箱</b>确认身份</div>'+
-        '<div><span class="num">2</span> 设置 <b>新密码</b>（规则与注册一致）</div>'+
-        '<div><span class="num">3</span> 原密码作废，学习数据完整保留</div>'+
-      '</div>'+
-      '<div class="auth-field" style="margin-top:14px"><label>QQ 邮箱</label><input type="text" id="fpEmail" placeholder="字母或数字，如 study2026@qq.com"></div>'+
-      '<div class="auth-field"><label>新密码</label><input type="password" id="fpPw" placeholder="至少6字符，含大小写字母和特殊符号" autocomplete="new-password"></div>'+
+      '<div class="auth-field"><label>QQ 邮箱</label><input type="text" id="fpEmail" placeholder="字母或数字，如 study2026@qq.com" autocomplete="username"></div>'+
+      '<div class="auth-field"><label>新密码</label><input type="password" id="fpPw" placeholder="请输入新密码" autocomplete="new-password"></div>'+
       '<div class="pw-meter" id="fpMeter">'+
         '<div class="pw-meter-bar fp-bar"><i></i><i></i><i></i><i></i></div>'+
         '<div class="pw-meter-txt"><span id="fpMeterCount">已满足 0/4</span><span class="pm-label" id="fpMeterLabel"></span></div>'+
       '</div>'+
       '<div class="auth-field"><label>确认新密码</label><input type="password" id="fpPw2" placeholder="再次输入新密码" autocomplete="new-password"></div>'+
+      reqHtml+
       '<div class="auth-err show" id="fpErr" style="display:none"></div>'+
     '</div>'+
     '<div class="m-actions"><button class="btn btn-ghost" data-act="close-modal">取消</button><button class="btn btn-primary" id="fpOkBtn">重置密码</button></div>'
@@ -1098,6 +1103,13 @@ function openForgotPw(){
   if(b)b.addEventListener('click',resetPw);
   var fpe=$('#fpPw');
   if(fpe&&typeof fpe.addEventListener==='function')fpe.addEventListener('input',updateFpMeter);
+  var emEl=$('#fpEmail');
+  if(emEl){
+    var cur=getSession();
+    if(cur)emEl.value=cur;
+    else if(lastAuthEmail)emEl.value=lastAuthEmail;
+    if(typeof emEl.focus==='function')emEl.focus();
+  }
 }
 function updateFpMeter(){
   var pwEl=$('#fpPw');
@@ -1113,6 +1125,17 @@ function updateFpMeter(){
   if(lb){
     lb.textContent=pw?st.label:'';
     lb.style.color=pw?st.color:'var(--ink-faint)';
+  }
+  var done=[
+    pw.length>=6,
+    /[a-z]/.test(pw),
+    /[A-Z]/.test(pw),
+    /[^A-Za-z0-9]/.test(pw)
+  ];
+  var ids=['fpReqLen','fpReqLower','fpReqUpper','fpReqSpec'];
+  for(var j=0;j<ids.length;j++){
+    var li=document.getElementById(ids[j]);
+    if(li&&li.classList)li.classList[done[j]?'add':'remove']('done');
   }
 }
 function fpErr(msg){
