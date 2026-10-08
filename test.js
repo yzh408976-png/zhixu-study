@@ -127,6 +127,27 @@ function runTests(){
   chk('光标收集-力在环处趋零',Math.abs(spChaseForce(__p,38,0)[0])<0.05,true);
   chk('光标收集-极近距离安全返回',spChaseForce(__p,0.0005,0)!==null,true);
 
+  chk('粒子密度-1080p超过100粒',spDustCount(1920,1080)>=100,true);
+  chk('粒子密度-小屏下限56粒',spDustCount(360,640),56);
+  chk('粒子密度-巨屏上限170粒',spDustCount(3840,2160),170);
+  var __mt=spMeteorSpawn(1200,800);
+  chk('流星-起始在屏幕外',__mt.x<0||__mt.x>1200,true);
+  chk('流星-斜向下坠落',__mt.vy>0,true);
+  chk('流星-水平速度非零',Math.abs(__mt.vx)>50,true);
+  chk('流星-速度在设定区间',Math.sqrt(__mt.vx*__mt.vx+__mt.vy*__mt.vy)>=340,true);
+  var __mx0=__mt.x;spMeteorStep(__mt,0.1);
+  chk('流星-步进按速度推进',Math.abs(__mt.x-__mx0-__mt.vx*0.1)<0.001,true);
+  chk('流星-新生流星存活',spMeteorAlive(__mt,1200,800),true);
+  __mt.life=__mt.maxLife;
+  chk('流星-寿命耗尽消亡',spMeteorAlive(__mt,1200,800),false);
+  var __m2=spMeteorSpawn(1200,800);__m2.life=0;
+  chk('流星-初始透明度为零',spMeteorAlpha(__m2),0);
+  __m2.life=__m2.maxLife;
+  chk('流星-临终透明度为零',Math.abs(spMeteorAlpha(__m2))<1e-10,true);
+  __m2.life=__m2.maxLife/2;
+  var __al=spMeteorAlpha(__m2);
+  chk('流星-中段最亮且包络有界',__al>0.9&&__al<=1,true);
+
   chk('sha256标准向量abc',sha256Sync('abc'),'ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad');
   chk('sha256多块长输入稳定',sha256Sync(sha256Sync('abc'))===sha256Sync(sha256Sync('abc')),true);
   chk('QQ邮箱校验-合法',validateQQEmail('123456789@qq.com'),true);
