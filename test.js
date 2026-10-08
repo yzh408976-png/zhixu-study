@@ -180,6 +180,12 @@ function runTests(){
   enterApp();
   chk('已登录会话→免登录直达',authMode,'register');
 
+  chk('游客头像整体可点击-按钮结构',/class="acct-login" data-act="show-auth"/.test(html),true);
+  chk('游客头像含未登录红点提示',/acctPulse/.test(html),true);
+  chk('红点动画尊重减少动态偏好',/prefers-reduced-motion: reduce\)\{\.acct-ava\.guest::after\{animation:none\}\}/.test(html),true);
+  chk('游客按钮含箭头引导',/acct-arrow/.test(html),true);
+  chk('游客按钮可键盘聚焦有焦点态',/\.acct-login:hover,\.acct-login:focus-visible/.test(html),true);
+
   console.log(fails===0?'=== 全部测试通过 ===':'=== '+fails+' 项测试失败 ===');
   process.exit(fails===0?0:1);
 }
