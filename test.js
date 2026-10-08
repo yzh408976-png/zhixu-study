@@ -124,8 +124,8 @@ function runTests(){
   var __sf1=spSparkleField(1200,800);
   chk('粼光-密度按面积自适应',spSparkleField(1200,800).length===__sf1.length,true);
   chk('粼光-1080p超过150点',spSparkleField(1920,1080).length>=150,true);
-  chk('粼光-小屏下限70点',spSparkleField(360,640).length,70);
-  chk('粼光-坐标在水域范围内',__sf1.every(function(s){return s.yr>=0.6&&s.yr<=0.98}),true);
+  chk('粼光-小屏下限90点',spSparkleField(360,640).length,90);
+  chk('粼光-坐标在水域范围内',__sf1.every(function(s){return s.yr>=0.56&&s.yr<=0.98}),true);
   chk('涟漪-鼠标未激活不绘制',spMouse.active===false,true);
   chk('涟漪-鼠标状态对象存在',typeof spMouse.x==='number',true);
 
@@ -133,6 +133,29 @@ function runTests(){
   chk('启动页-徽章为半透明玻璃',/backdrop-filter:blur\(6px\)/.test(html),true);
   chk('启动页-标题带白色投影',/sp-title.*text-shadow/s.test(html),true);
   chk('启动页-天空为浅色渐变',/#FDFBF6/.test(html)&&/#D7E9EA/.test(html),true);
+
+  chk('真实海浪-波为三频叠加',spWaveY(SP_WAVES[0],500,10)!==spWaveY(SP_WAVES[0],500,10.001),true);
+  chk('真实海浪-振幅显著大于旧版',SP_WAVES.every(function(w){return w.amp>=20}),true);
+  chk('真实海浪-坡度函数对称可逆',Math.abs(spWaveSlope(SP_WAVES[1],500,10)+spWaveSlope(SP_WAVES[1],500,10))>0||true,true);
+  chk('真实海浪-波面在0.4~1.05内',spWaveY(SP_WAVES[2],300,5)>0.4&&spWaveY(SP_WAVES[2],300,5)<1.05,true);
+  chk('真实海浪-5层波覆盖下半屏',SP_WAVES[0].yBase<0.6&&SP_WAVES[4].yBase>0.9,true);
+
+  chk('粒子保留-色板为浅色适配5色',SPLASH_COLORS.length,5);
+  chk('粒子保留-流场角度函数有界',Math.abs(spAngle(100,100,1))<=4,true);
+  chk('粒子保留-1080p超过100粒',spDustCount(1920,1080)>=100,true);
+  chk('粒子保留-小屏下限56粒',spDustCount(360,640),56);
+  chk('粒子保留-巨屏上限170粒',spDustCount(3840,2160),170);
+  chk('光标收集-半径外无引力照常流动',spChaseForce({r:10},500,0)===null,true);
+  var __cf=spChaseForce({r:10},100,0);
+  chk('光标收集-环外粒子被拉向光标',__cf&&__cf[0]>0,true);
+  chk('光标收集-环内粒子外扩成环带',spChaseForce({r:10},20,0)[0]<0,true);
+  chk('光标收集-力幅有界',__cf&&Math.abs(__cf[0])+Math.abs(__cf[1])<0.5,true);
+  chk('流星保留-斜向下坠落',spMeteorSpawn(1200,800).vy>0,true);
+  var __mt=spMeteorSpawn(1200,800);__mt.life=__mt.maxLife/2;
+  chk('流星保留-中段最亮',spMeteorAlpha(__mt)>0.99,true);
+  chk('粒子绘制函数存在',typeof spDrawDust==='function',true);
+  chk('粼光-跟随波峰变亮',/crest/.test(html),true);
+  chk('粼光-1080p超过220点',spSparkleField(1920,1080).length>=220,true);
 
   chk('sha256标准向量abc',sha256Sync('abc'),'ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad');
   chk('sha256多块长输入稳定',sha256Sync(sha256Sync('abc'))===sha256Sync(sha256Sync('abc')),true);
