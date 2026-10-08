@@ -449,7 +449,7 @@ input:focus{border-color:var(--cinnabar)}
       <span class="sp-chip">AI 学习教练</span>
     </div>
     <button class="btn btn-primary sp-enter" data-act="enter-app">进入系统</button>
-    <p class="sp-foot">光标所至 · 光尘汇聚 · 移开则复归流转 · 按回车亦可进入</p>
+    <p class="sp-foot">光标所至 · 光尘汇聚 · 时有流星掠过 · 按回车亦可进入</p>
   </div>
 </div>
 <div id="auth" class="hide"></div>
@@ -1841,6 +1841,53 @@ function spSprites(){
 function spAngle(x,y,t){
   return Math.sin(x*0.0015+t*0.3)*1.5+Math.cos(y*0.0012-t*0.23)*1.5+Math.sin((x+y)*0.0007+t*0.17)*0.8;
 }
+function spDustCount(w,h){return clamp(Math.round(w*h/13000),56,170)}
+var SP_METEOR_MAX=3;
+function spMeteorSpawn(w,h){
+  var dir=Math.random()<0.5?1:-1;
+  var ang=(22+Math.random()*24)*Math.PI/180;
+  var sp=340+Math.random()*200;
+  return{
+    x:dir>0?-60-Math.random()*80:w+60+Math.random()*80,
+    y:-40+Math.random()*h*0.45,
+    vx:Math.cos(ang)*sp*dir,vy:Math.sin(ang)*sp,
+    len:90+Math.random()*80,
+    life:0,maxLife:1.1+Math.random()*0.9,
+    ci:Math.floor(Math.random()*SPLASH_COLORS.length)
+  };
+}
+function spMeteorStep(m,dt){
+  m.life+=dt;m.x+=m.vx*dt;m.y+=m.vy*dt;
+}
+function spMeteorAlive(m,w,h){
+  if(!m||m.life>=m.maxLife)return false;
+  var mgn=m.len+80;
+  return m.x>-mgn&&m.x<w+mgn&&m.y>-mgn&&m.y<h+mgn;
+}
+function spMeteorAlpha(m){
+  var f=Math.min(Math.max(m.life/m.maxLife,0),1);
+  return Math.sin(f*Math.PI);
+}
+function spMeteorDraw(ctx,m){
+  var al=spMeteorAlpha(m);
+  if(al<=0.004)return;
+  var c=SPLASH_COLORS[m.ci];
+  var v=Math.sqrt(m.vx*m.vx+m.vy*m.vy)||1;
+  var x0=m.x,y0=m.y,x1=m.x-m.vx/v*m.len,y1=m.y-m.vy/v*m.len;
+  var grad=ctx.createLinearGradient(x0,y0,x1,y1);
+  grad.addColorStop(0,'rgba('+c.join(',')+','+(0.62*al).toFixed(3)+')');
+  grad.addColorStop(1,'rgba('+c.join(',')+',0)');
+  ctx.strokeStyle=grad;ctx.lineCap='round';
+  ctx.lineWidth=2.6;ctx.beginPath();ctx.moveTo(x0,y0);ctx.lineTo(x1,y1);ctx.stroke();
+  ctx.lineWidth=7;ctx.globalAlpha=0.28*al;
+  ctx.beginPath();ctx.moveTo(x0,y0);ctx.lineTo(x1,y1);ctx.stroke();
+  ctx.globalAlpha=1;
+  var hg=ctx.createRadialGradient(x0,y0,0,x0,y0,7);
+  hg.addColorStop(0,'rgba(253,250,242,'+(0.95*al).toFixed(3)+')');
+  hg.addColorStop(0.4,'rgba('+c.join(',')+','+(0.5*al).toFixed(3)+')');
+  hg.addColorStop(1,'rgba('+c.join(',')+',0)');
+  ctx.fillStyle=hg;ctx.beginPath();ctx.arc(x0,y0,7,0,6.2832);ctx.fill();
+}
 function showSplash(){
   var el=$('#splash'),cv=$('#splashFx');
   if(!el||!cv)return;
@@ -1855,16 +1902,17 @@ function showSplash(){
   ctx.setTransform(dpr,0,0,dpr,0,0);
   var sprites=spSprites();
   if(!sprites.length)return;
-  var n=clamp(Math.round(w*h/26000),26,72),ps=[],i;
+  var n=spDustCount(w,h),ps=[],i;
   for(i=0;i<n;i++){
     ps.push({
       x:Math.random()*w,y:Math.random()*h,
-      r:7+Math.random()*16,
+      r:6+Math.random()*14,
       vx:0,vy:0,
-      a:0.28+Math.random()*0.38,
+      a:0.26+Math.random()*0.36,
       ci:Math.floor(Math.random()*sprites.length)
     });
   }
+  var meteors=[],nextMeteor=1.2,lastTs=0;
   function draw(){
     ctx.clearRect(0,0,w,h);
     for(var j=0;j<ps.length;j++){
@@ -1873,10 +1921,20 @@ function showSplash(){
       ctx.drawImage(sprites[p.ci],p.x-p.r,p.y-p.r,p.r*2,p.r*2);
     }
     ctx.globalAlpha=1;
+    for(var mj=0;mj<meteors.length;mj++)spMeteorDraw(ctx,meteors[mj]);
   }
   function step(ts){
     if(!splashRun)return;
     var t=ts/1000;
+    var dt=lastTs?Math.min((ts-lastTs)/1000,0.05):0.016;lastTs=ts;
+    if(t>=nextMeteor&&meteors.length<SP_METEOR_MAX){
+      meteors.push(spMeteorSpawn(w,h));
+      nextMeteor=t+1.8+Math.random()*3.2;
+    }
+    for(var mj2=meteors.length-1;mj2>=0;mj2--){
+      spMeteorStep(meteors[mj2],dt);
+      if(!spMeteorAlive(meteors[mj2],w,h))meteors.splice(mj2,1);
+    }
     for(var j=0;j<ps.length;j++){
       var p=ps[j];
       var ang=spAngle(p.x,p.y,t);
