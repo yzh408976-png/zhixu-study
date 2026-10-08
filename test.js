@@ -210,6 +210,8 @@ function runTests(){
   chk('忘记密码-不再使用弹窗',html.indexOf('fp-steps')<0,true);
   chk('忘记密码-旧弹窗函数已移除',html.indexOf('function openForgotPw')<0,true);
   chk('忘记密码-标题为重置密码',/重置密码/.test(html),true);
+  chk('忘记密码-界面切换有滑入动画',/auth-flip/.test(html)&&/authFlip/.test(html),true);
+  chk('忘记密码-渲染后聚焦邮箱',/renderForgotAuth/.test(html),true);
 
   chk('忘记密码-邮箱+新密码+确认三栏齐全',/id="fpEmail"/.test(html)&&/id="fpPw"/.test(html)&&/id="fpPw2"/.test(html),true);
   chk('忘记密码-含强弱条逐条点亮',/fp-bar/.test(html)&&/fpMeterCount/.test(html),true);
