@@ -117,14 +117,15 @@ function runTests(){
   chk('启动页粒子色板为浅色适配5色',SPLASH_COLORS.length,5);
 
   chk('鼠标跟随-状态对象默认非激活',spMouse&&spMouse.active===false,true);
-  chk('鼠标跟随-半径外无引力',spChaseForce(500,0)===null,true);
-  var __cf=spChaseForce(100,0);
-  chk('鼠标跟随-右侧粒子受向右引力',__cf&&__cf[0]>0,true);
-  chk('鼠标跟随-切向旋绕分量非零',__cf&&Math.abs(__cf[1])>0.01,true);
-  chk('鼠标跟随-力幅有界',__cf&&Math.abs(__cf[0])+Math.abs(__cf[1])<0.5,true);
-  var __cf2=spChaseForce(1,0);
-  chk('鼠标跟随-紧邻光标力仍收敛',__cf2&&Math.abs(__cf2[0])<0.5&&Math.abs(__cf2[1])<0.5,true);
-  chk('鼠标跟随-极近距离安全返回',spChaseForce(0.0005,0)!==null,true);
+  var __p={r:10};
+  chk('光标收集-半径外无引力照常流动',spChaseForce(__p,500,0)===null,true);
+  var __cf=spChaseForce(__p,100,0);
+  chk('光标收集-环外粒子被拉向光标',__cf&&__cf[0]>0,true);
+  chk('光标收集-切向漂移非零',__cf&&Math.abs(__cf[1])>0.01,true);
+  chk('光标收集-力幅有界',__cf&&Math.abs(__cf[0])+Math.abs(__cf[1])<0.5,true);
+  chk('光标收集-环内粒子外扩成环带',spChaseForce(__p,20,0)[0]<0,true);
+  chk('光标收集-力在环处趋零',Math.abs(spChaseForce(__p,38,0)[0])<0.05,true);
+  chk('光标收集-极近距离安全返回',spChaseForce(__p,0.0005,0)!==null,true);
 
   chk('sha256标准向量abc',sha256Sync('abc'),'ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad');
   chk('sha256多块长输入稳定',sha256Sync(sha256Sync('abc'))===sha256Sync(sha256Sync('abc')),true);

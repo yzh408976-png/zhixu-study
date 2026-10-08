@@ -449,7 +449,7 @@ input:focus{border-color:var(--cinnabar)}
       <span class="sp-chip">AI 学习教练</span>
     </div>
     <button class="btn btn-primary sp-enter" data-act="enter-app">进入系统</button>
-    <p class="sp-foot">移动光标 · 粒子随行 · 按回车亦可进入</p>
+    <p class="sp-foot">光标所至 · 光尘汇聚 · 移开则复归流转 · 按回车亦可进入</p>
   </div>
 </div>
 <div id="auth" class="hide"></div>
@@ -1814,14 +1814,14 @@ function spBindMouse(el){
   },{passive:true});
   el.addEventListener('touchend',function(){spMouse.active=false},{passive:true});
 }
-function spChaseForce(dx,dy){
+function spChaseForce(p,dx,dy){
   var d=Math.sqrt(dx*dx+dy*dy);
   if(d>SP_CHASE_R||d<0.0001)return null;
+  var tr=16+p.r*2.2;
   var nx=dx/d,ny=dy/d;
-  var fall=1-d/SP_CHASE_R;
-  var pull=0.06+fall*0.3;
-  var swirl=0.1*fall;
-  return[nx*pull-ny*swirl,ny*pull+nx*swirl];
+  var k=Math.max(-0.32,Math.min(0.32,(d-tr)*0.045));
+  var tang=0.03;
+  return[nx*k-ny*tang,ny*k+nx*tang];
 }
 function spSprites(){
   var arr=[],i;
@@ -1882,7 +1882,7 @@ function showSplash(){
       var ang=spAngle(p.x,p.y,t);
       p.vx+=Math.cos(ang)*0.012;p.vy+=Math.sin(ang)*0.012;
       if(spMouse.active){
-        var cf=spChaseForce(spMouse.x-p.x,spMouse.y-p.y);
+        var cf=spChaseForce(p,spMouse.x-p.x,spMouse.y-p.y);
         if(cf){p.vx+=cf[0];p.vy+=cf[1]}
       }
       p.vx*=0.97;p.vy*=0.97;
