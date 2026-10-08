@@ -345,9 +345,6 @@ input:focus{border-color:var(--cinnabar)}
 .pw-meter-bar i{flex:1;background:var(--line);border-radius:99px;transition:background .18s ease}
 .pw-meter-txt{display:flex;justify-content:space-between;font-size:11px;color:var(--ink-faint);margin-top:4px}
 .pw-meter-txt .pm-label{font-weight:700}
-.fp-steps{font-size:13px;line-height:1.9;color:var(--ink-soft)}
-.fp-steps b{color:var(--ink)}
-.fp-steps .num{font-family:var(--font-num);color:var(--cinnabar-deep);font-weight:700}
 .auth-note{margin-top:16px;font-size:11.5px;color:var(--ink-faint);line-height:1.7;border-top:1px dashed var(--line-strong);padding-top:12px}
 #acctBox{display:none}
 .acct-chip{display:flex;align-items:center;gap:9px;font-size:12px;color:var(--ink-soft);margin-bottom:12px}
@@ -967,6 +964,7 @@ function hideAuth(){var el=$('#auth');if(el)el.classList.add('hide')}
 function renderAuth(){
   var el=$('#auth');
   if(!el)return;
+  if(authMode==='forgot'){renderForgotAuth(el);return}
   var isReg=authMode==='register';
   var pwReqHtml=
     '<div class="pw-req">'+
@@ -1073,8 +1071,20 @@ function authGuest(){
   if(!state.onboarded)setTimeout(openOnboarding,300);
   toast('以游客模式进入 · 数据仍保存在本机');
 }
-function openForgotPw(){
-  var reqHtml=
+function renderForgotAuth(el){
+  el.innerHTML=
+  '<div class="card auth-card">'+
+    '<div class="auth-seal">序</div>'+
+    '<div class="auth-title">智序</div>'+
+    '<div class="auth-sub">科学学习编排引擎 · 重置密码</div>'+
+    '<div class="auth-err" id="authErr"></div>'+
+    '<div class="auth-field"><label>QQ 邮箱</label><input type="text" id="fpEmail" placeholder="字母或数字，如 study2026@qq.com" autocomplete="username"></div>'+
+    '<div class="auth-field"><label>新密码</label><input type="password" id="fpPw" placeholder="请输入新密码" autocomplete="new-password"></div>'+
+    '<div class="pw-meter" id="fpMeter">'+
+      '<div class="pw-meter-bar fp-bar"><i></i><i></i><i></i><i></i></div>'+
+      '<div class="pw-meter-txt"><span id="fpMeterCount">已满足 0/4</span><span class="pm-label" id="fpMeterLabel"></span></div>'+
+    '</div>'+
+    '<div class="auth-field"><label>确认新密码</label><input type="password" id="fpPw2" placeholder="再次输入新密码" autocomplete="new-password"></div>'+
     '<div class="pw-req">'+
       '<div class="pw-req-t"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9.5"/><path d="M12 8v5M12 16.2v.4"/></svg>新密码输入要求</div>'+
       '<ul>'+
@@ -1083,26 +1093,11 @@ function openForgotPw(){
         '<li id="fpReqUpper" data-pw-req>包含大写英文字母 (A-Z)</li>'+
         '<li id="fpReqSpec" data-pw-req>包含特殊符号 (如 !@#$%)</li>'+
       '</ul>'+
-    '</div>';
-  openModal(
-    '<h3>重置密码</h3>'+
-    '<div class="m-body">'+
-      '<div class="auth-field"><label>QQ 邮箱</label><input type="text" id="fpEmail" placeholder="字母或数字，如 study2026@qq.com" autocomplete="username"></div>'+
-      '<div class="auth-field"><label>新密码</label><input type="password" id="fpPw" placeholder="请输入新密码" autocomplete="new-password"></div>'+
-      '<div class="pw-meter" id="fpMeter">'+
-        '<div class="pw-meter-bar fp-bar"><i></i><i></i><i></i><i></i></div>'+
-        '<div class="pw-meter-txt"><span id="fpMeterCount">已满足 0/4</span><span class="pm-label" id="fpMeterLabel"></span></div>'+
-      '</div>'+
-      '<div class="auth-field"><label>确认新密码</label><input type="password" id="fpPw2" placeholder="再次输入新密码" autocomplete="new-password"></div>'+
-      reqHtml+
-      '<div class="auth-err show" id="fpErr" style="display:none"></div>'+
     '</div>'+
-    '<div class="m-actions"><button class="btn btn-ghost" data-act="close-modal">取消</button><button class="btn btn-primary" id="fpOkBtn">重置密码</button></div>'
-  );
-  var b=$('#fpOkBtn');
-  if(b)b.addEventListener('click',resetPw);
-  var fpe=$('#fpPw');
-  if(fpe&&typeof fpe.addEventListener==='function')fpe.addEventListener('input',updateFpMeter);
+    '<button class="btn btn-primary" style="width:100%;justify-content:center;margin-top:4px" data-act="auth-forgot-submit">重置密码</button>'+
+    '<div class="auth-links"><button data-act="auth-back-login">返回登录</button></div>'+
+    '<div class="auth-note">本账号体系为本机实现：重置后原密码立即作废，学习数据完整保留；请用新密码重新登录。</div>'+
+  '</div>';
   var emEl=$('#fpEmail');
   if(emEl){
     var cur=getSession();
@@ -1110,6 +1105,8 @@ function openForgotPw(){
     else if(lastAuthEmail)emEl.value=lastAuthEmail;
     if(typeof emEl.focus==='function')emEl.focus();
   }
+  var fpe=$('#fpPw');
+  if(fpe&&typeof fpe.addEventListener==='function')fpe.addEventListener('input',updateFpMeter);
 }
 function updateFpMeter(){
   var pwEl=$('#fpPw');
@@ -1138,28 +1135,24 @@ function updateFpMeter(){
     if(li&&li.classList)li.classList[done[j]?'add':'remove']('done');
   }
 }
-function fpErr(msg){
-  var e=$('#fpErr');
-  if(e){e.textContent=msg;e.style.display=msg?'block':'none'}
-}
 function resetPw(){
   var emEl=$('#fpEmail'),pwEl=$('#fpPw'),pw2El=$('#fpPw2');
-  var em=emEl?String(emEl.value||'').trim():'';
+  var em=emEl?String(emEl.value||'').trim().toLowerCase():'';
   var pw=pwEl?String(pwEl.value||''):'';
   var pw2=pw2El?String(pw2El.value||''):'';
-  if(!validateQQEmail(em)){fpErr('请输入正确的 QQ 邮箱（数字 @qq.com）');return}
+  if(!validateQQEmail(em)){authError('请输入正确的 QQ 邮箱（字母或数字 @qq.com）');return}
   var a=getAccounts();
-  if(!a[em]){fpErr('该邮箱尚未注册，请先注册账号');return}
+  if(!a[em]){authError('该邮箱尚未注册，请先注册账号');return}
   var vpw=validatePw(pw);
-  if(!vpw.ok){fpErr(vpw.msg);return}
-  if(pw!==pw2){fpErr('两次输入的新密码不一致');return}
+  if(!vpw.ok){authError(vpw.msg);return}
+  if(pw!==pw2){authError('两次输入的新密码不一致');return}
   var salt=Math.random().toString(36).slice(2,10)+Date.now().toString(36);
   a[em].salt=salt;a[em].hash=pwHash(pw,salt);
   putAccounts(a);
-  closeModal();
+  lastAuthEmail=em;
+  authMode='login';renderAuth();
   var emIn=$('#authEmail');
   if(emIn)emIn.value=em;
-  authMode='login';renderAuth();
   toast('密码已重置，请用新密码登录');
 }
 function logoutAccount(){
@@ -1910,7 +1903,9 @@ document.addEventListener('click',function(e){
   if(act==='auth-mode'){authMode=el.getAttribute('data-m');renderAuth();return}
   if(act==='auth-submit'){authSubmit();return}
   if(act==='auth-guest'){authGuest();return}
-  if(act==='auth-forgot'){openForgotPw();return}
+  if(act==='auth-forgot'){authMode='forgot';renderAuth();return}
+  if(act==='auth-forgot-submit'){resetPw();return}
+  if(act==='auth-back-login'){authMode='login';renderAuth();return}
   if(act==='logout'){logoutAccount();return}
   if(act==='del-account'){deleteAccount();return}
   if(act==='show-auth'){showAuth('login');return}
@@ -2200,7 +2195,10 @@ document.addEventListener('keydown',function(e){
   if(el&&el.classList&&el.classList.contains&&!el.classList.contains('hide')){enterApp();return}
   if(e.key!=='Enter')return;
   var au=$('#auth');
-  if(au&&au.classList&&au.classList.contains&&!au.classList.contains('hide'))authSubmit();
+  if(au&&au.classList&&au.classList.contains&&!au.classList.contains('hide')){
+    if(authMode==='forgot')resetPw();
+    else authSubmit();
+  }
 });
 boot();
 </script>

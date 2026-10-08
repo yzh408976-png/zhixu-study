@@ -206,6 +206,11 @@ function runTests(){
   chk('登录-强密码正确可登录',loginAccount('222222222@qq.com','Good!Pass1').ok===true,true);
   chk('忘记密码-未注册邮箱不可重置',getAccounts()['333333333@qq.com']===undefined,true);
 
+  chk('忘记密码-登录界面原位切换',/auth-forgot-submit/.test(html)&&/auth-back-login/.test(html),true);
+  chk('忘记密码-不再使用弹窗',html.indexOf('fp-steps')<0,true);
+  chk('忘记密码-旧弹窗函数已移除',html.indexOf('function openForgotPw')<0,true);
+  chk('忘记密码-标题为重置密码',/重置密码/.test(html),true);
+
   chk('忘记密码-邮箱+新密码+确认三栏齐全',/id="fpEmail"/.test(html)&&/id="fpPw"/.test(html)&&/id="fpPw2"/.test(html),true);
   chk('忘记密码-含强弱条逐条点亮',/fp-bar/.test(html)&&/fpMeterCount/.test(html),true);
   chk('忘记密码-含要求提示卡',/新密码输入要求/.test(html),true);
