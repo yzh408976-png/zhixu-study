@@ -108,40 +108,34 @@ function runTests(){
   switchView('coach');
   chk('教练视图可切换',true,true);
 
-  chk('启动页模块已定义',typeof showSplash==='function'&&typeof enterApp==='function'&&typeof spWaveY==='function',true);
+  chk('启动页模块已定义',typeof showSplash==='function'&&typeof enterApp==='function'&&typeof spCausticValue==='function',true);
   showSplash();
   chk('showSplash无canvas环境安全退出',splashRun===false,true);
   enterApp();
   chk('enterApp可安全调用',true,true);
-  chk('海浪-共5层波带',SP_WAVES.length,5);
-  chk('海浪-波基线覆盖屏面主体',SP_WAVES[0].yBase>0.3&&SP_WAVES[4].yBase<=1,true);
-  chk('海浪-波基线从远到近递增',SP_WAVES[0].yBase<SP_WAVES[1].yBase&&SP_WAVES[3].yBase<SP_WAVES[4].yBase,true);
-  chk('海浪-波函数输出在0~1区间',spWaveY(SP_WAVES[2],500,10)>0&&spWaveY(SP_WAVES[2],500,10)<1,true);
-  chk('海浪-波浪随时间推进变化',spWaveY(SP_WAVES[0],500,10)!==spWaveY(SP_WAVES[0],500,11),true);
-  chk('海浪-波浪随横向位置起伏',spWaveY(SP_WAVES[1],100,10)!==spWaveY(SP_WAVES[1],600,10),true);
-  chk('海浪-有正反向速度差',SP_WAVES.some(function(w){return w.speed>0})&&SP_WAVES.some(function(w){return w.speed<0}),true);
-  chk('海浪-近岸波透明度更高',SP_WAVES[4].alpha>SP_WAVES[0].alpha,true);
-  var __sf1=spSparkleField(1200,800);
-  chk('粼光-密度按面积自适应',spSparkleField(1200,800).length===__sf1.length,true);
-  chk('粼光-1080p超过280条',spSparkleField(1920,1080).length>=280,true);
-  chk('粼光-小屏下限120条',spSparkleField(360,640).length,120);
-  chk('粼光-横向光带遍布海面',__sf1.every(function(s){return s.yr>=0.40&&s.yr<=0.97}),true);
-  chk('粼光-为横向长条有半长参数',__sf1.every(function(s){return s.hl>=5&&s.hl<=25}),true);
-  chk('粼光-光带带微小倾角',__sf1.every(function(s){return Math.abs(s.rot)<=0.11}),true);
-  chk('粼光-光带横向漂移有界',__sf1.every(function(s){return Math.abs(s.drift)>=5&&Math.abs(s.drift)<=21}),true);
+  chk('焦散-干涉函数输出有界',Math.abs(spCausticValue(500,300,10))<=4.01,true);
+  chk('焦散-干涉随时间演化',spCausticValue(500,300,10)!==spCausticValue(500,300,11),true);
+  chk('焦散-干涉随位置变化',spCausticValue(100,300,10)!==spCausticValue(600,300,10),true);
+  chk('焦散-阈值左上高于右下',spCausticThreshold(50,50,1200,800)>spCausticThreshold(1100,750,1200,800),true);
+  chk('焦散-阈值沿对角线单调递减',spCausticThreshold(100,100,1000,800)>spCausticThreshold(500,400,1000,800)&&spCausticThreshold(500,400,1000,800)>spCausticThreshold(900,700,1000,800),true);
+  var __cntTL=0,__cntBR=0,__a,__b;
+  for(__a=0;__a<10;__a++)for(__b=0;__b<8;__b++){
+    var __x=16+__a*24,__y=16+__b*24;
+    if(spCausticValue(__x,__y,7)>spCausticThreshold(__x,__y,640,480))__cntTL++;
+    var __x2=380+__a*24,__y2=300+__b*24;
+    if(spCausticValue(__x2,__y2,7)>spCausticThreshold(__x2,__y2,640,480))__cntBR++;
+  }
+  chk('焦散-右下半屏亮斑多于左上',__cntBR>__cntTL,true);
+  chk('焦散-暖白高光色',html.indexOf('255,248,231')>=0,true);
+  chk('焦散-加法混合形成交汇亮化',html.indexOf("'lighter'")>=0,true);
+  chk('焦散-网格步长26px',SP_CAUSTIC_STEP,26);
+  chk('背景-对角线冷暖渐变',/#9CCBDD/.test(html)&&/#F2E6CD/.test(html),true);
   chk('涟漪-鼠标未激活不绘制',spMouse.active===false,true);
   chk('涟漪-鼠标状态对象存在',typeof spMouse.x==='number',true);
 
   chk('启动页-内容悬浮动画已定义',/spFloat/.test(html),true);
   chk('启动页-徽章为半透明玻璃',/backdrop-filter:blur\(6px\)/.test(html),true);
   chk('启动页-标题带白色投影',/sp-title.*text-shadow/s.test(html),true);
-  chk('启动页-天空为浅色渐变',/#FDFBF6/.test(html)&&/#D7E9EA/.test(html),true);
-
-  chk('真实海浪-波为三频叠加',spWaveY(SP_WAVES[0],500,10)!==spWaveY(SP_WAVES[0],500,10.001),true);
-  chk('真实海浪-振幅显著大于旧版',SP_WAVES.every(function(w){return w.amp>=20}),true);
-  chk('真实海浪-坡度函数对称可逆',Math.abs(spWaveSlope(SP_WAVES[1],500,10)+spWaveSlope(SP_WAVES[1],500,10))>0||true,true);
-  chk('真实海浪-波面在屏内0.05~1.1',spWaveY(SP_WAVES[2],300,5)>0.05&&spWaveY(SP_WAVES[2],300,5)<1.1,true);
-  chk('真实海浪-海面占屏下六成',SP_WAVES[0].yBase<0.42&&SP_WAVES[4].yBase>0.9,true);
 
   chk('粒子保留-色板为浅色适配5色',SPLASH_COLORS.length,5);
   chk('粒子保留-流场角度函数有界',Math.abs(spAngle(100,100,1))<=4,true);
@@ -157,8 +151,7 @@ function runTests(){
   var __mt=spMeteorSpawn(1200,800);__mt.life=__mt.maxLife/2;
   chk('流星保留-中段最亮',spMeteorAlpha(__mt)>0.99,true);
   chk('粒子绘制函数存在',typeof spDrawDust==='function',true);
-  chk('粼光-跟随波峰变亮',/crest/.test(html),true);
-  chk('粼光-1080p超过220点',spSparkleField(1920,1080).length>=220,true);
+  chk('焦散绘制函数存在',typeof spDrawCaustics==='function',true);
 
   chk('sha256标准向量abc',sha256Sync('abc'),'ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad');
   chk('sha256多块长输入稳定',sha256Sync(sha256Sync('abc'))===sha256Sync(sha256Sync('abc')),true);
