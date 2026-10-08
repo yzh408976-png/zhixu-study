@@ -326,11 +326,26 @@ input:focus{border-color:var(--cinnabar)}
 .auth-note{margin-top:16px;font-size:11.5px;color:var(--ink-faint);line-height:1.7;border-top:1px dashed var(--line-strong);padding-top:12px}
 #acctBox{display:none}
 .acct-chip{display:flex;align-items:center;gap:9px;font-size:12px;color:var(--ink-soft);margin-bottom:12px}
-.acct-ava{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13.5px;flex-shrink:0;font-family:var(--font-display);font-weight:700}
+.acct-ava{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13.5px;flex-shrink:0;font-family:var(--font-display);font-weight:700;position:relative}
 .acct-ava.guest{border:1.5px dashed var(--line-strong);color:var(--ink-faint);background:var(--card)}
 .acct-ava.user{background:var(--cinnabar);color:#FDF8EE;box-shadow:0 4px 10px -6px rgba(162,45,18,.8)}
 .acct-txt{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-family:var(--font-num)}
 .acct-chip .acct-act{color:var(--cinnabar-deep);font-size:12px;text-decoration:underline dotted;flex-shrink:0}
+.acct-login{
+  display:flex;align-items:center;gap:9px;width:calc(100% + 16px);margin:0 -8px;padding:7px 8px;
+  border-radius:10px;cursor:pointer;transition:background .16s ease;font-family:var(--font-body);
+}
+.acct-login:hover,.acct-login:focus-visible{background:var(--cinnabar-wash);outline:none}
+.acct-login:hover .acct-ava.guest,.acct-login:focus-visible .acct-ava.guest{border-color:var(--cinnabar);border-style:solid;color:var(--cinnabar-deep)}
+.acct-login:hover .acct-txt,.acct-login:focus-visible .acct-txt{color:var(--ink)}
+.acct-login .acct-arrow{color:var(--ink-faint);flex-shrink:0;transition:transform .16s ease, color .16s ease}
+.acct-login:hover .acct-arrow{transform:translateX(2px);color:var(--cinnabar-deep)}
+.acct-ava.guest::after{
+  content:'';position:absolute;top:-1px;right:-1px;width:8px;height:8px;border-radius:50%;
+  background:var(--cinnabar);border:2px solid var(--paper);animation:acctPulse 2.2s ease-in-out infinite;
+}
+@keyframes acctPulse{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.45);opacity:.55}}
+@media (prefers-reduced-motion: reduce){.acct-ava.guest::after{animation:none}}
 
 /* ---------- 弹窗 / Toast ---------- */
 .modal-mask{
@@ -1045,9 +1060,11 @@ function renderNav(){
         '<span class="acct-txt" title="'+esc(em)+'">'+esc(em)+'</span>'+
         '<button class="acct-act" data-act="logout">退出</button>';
     }else{
-      ab.innerHTML='<span class="acct-ava guest">客</span>'+
-        '<span class="acct-txt">游客 · 未登录</span>'+
-        '<button class="acct-act" data-act="show-auth">登录 / 注册</button>';
+      ab.innerHTML='<button class="acct-login" data-act="show-auth" title="点击登录或注册">'+
+        '<span class="acct-ava guest">客</span>'+
+        '<span class="acct-txt" style="font-family:var(--font-body)">游客 · 未登录</span>'+
+        '<span class="acct-arrow"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg></span>'+
+      '</button>';
     }
   }
 }
