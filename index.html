@@ -684,22 +684,23 @@ function validatePw(pw){
 }
 function pwStrength(pw){
   pw=String(pw||'');
-  var req=validatePw(pw);
-  if(!req.ok)return{level:0,label:'不合规',color:'#B7B2A6',ok:false};
-  var score=0;
-  if(pw.length>=8)score++;
-  if(pw.length>=12)score++;
-  if(/[0-9]/.test(pw))score++;
-  if(/[^A-Za-z0-9]{2,}/.test(pw))score++;
-  if(/[a-z]/.test(pw)&&/[A-Z]/.test(pw)&&pw.length>=10)score++;
-  score=score>=5?4:(score>=3?3:(score>=2?2:1));
-  var map=[
-    {label:'弱',color:'#C7391B'},
-    {label:'中',color:'#9A7B24'},
-    {label:'强',color:'#2F6B5E'},
-    {label:'极强',color:'#3A5A8C'}
-  ];
-  return{level:score,label:map[score-1].label,color:map[score-1].color,ok:true};
+  var rules=[pw.length>=6,/[a-z]/.test(pw),/[A-Z]/.test(pw),/[^A-Za-z0-9]/.test(pw)];
+  var n=0;
+  for(var i=0;i<rules.length;i++)if(rules[i])n++;
+  if(n===0)return{level:0,label:'',color:'#B7B2A6',met:0,ok:false};
+  var tierColors=['#C7391B','#9A7B24','#2F6B5E','#3A5A8C'];
+  if(n<4){
+    var part=['弱','中','较强'][n-1];
+    return{level:n,label:part+' · 还差 '+(4-n)+' 项',color:tierColors[n-1],met:n,ok:false};
+  }
+  var q=0;
+  if(pw.length>=8)q++;
+  if(pw.length>=12)q++;
+  if(/[0-9]/.test(pw))q++;
+  if(/[^A-Za-z0-9]{2,}/.test(pw))q++;
+  var lbl=q>=4?'极强':(q>=2?'强':'达标');
+  var col=q>=4?'#3A5A8C':'#2F6B5E';
+  return{level:4,label:lbl,color:col,met:4,ok:true};
 }
 function getAccounts(){
   try{var a=JSON.parse(localStorage.getItem(ACCOUNTS_KEY));return(a&&typeof a==='object'&&!Array.isArray(a))?a:{}}
@@ -990,7 +991,7 @@ function renderAuth(){
     '<div class="auth-field"><label>密码</label><input type="password" id="authPw" placeholder="请输入密码" autocomplete="'+(isReg?'new-password':'current-password')+'"></div>'+
     '<div class="pw-meter" id="pwMeter">'+
       '<div class="pw-meter-bar"><i></i><i></i><i></i><i></i></div>'+
-      '<div class="pw-meter-txt"><span>密码强度</span><span class="pm-label" id="pwMeterLabel"></span></div>'+
+      '<div class="pw-meter-txt"><span id="pwMeterCount">已满足 0/4</span><span class="pm-label" id="pwMeterLabel"></span></div>'+
     '</div>'+
     (isReg?'<div class="auth-field"><label>确认密码</label><input type="password" id="authPw2" placeholder="再次输入密码" autocomplete="new-password"></div>':'')+
     (isReg?pwReqHtml:'')+
@@ -1022,6 +1023,8 @@ function updatePwMeter(){
   for(var i=0;i<bars.length;i++){
     if(bars[i].style)bars[i].style.background=(pw&&i<st.level)?st.color:'var(--line)';
   }
+  var ct=$('#pwMeterCount');
+  if(ct)ct.textContent='已满足 '+st.met+'/4'+(st.met===4?' · 全部达标':'');
   var lb=$('#pwMeterLabel');
   if(lb){
     lb.textContent=pw?st.label:'';
@@ -1083,7 +1086,7 @@ function openForgotPw(){
       '<div class="auth-field"><label>新密码</label><input type="password" id="fpPw" placeholder="至少6字符，含大小写字母和特殊符号" autocomplete="new-password"></div>'+
       '<div class="pw-meter" id="fpMeter">'+
         '<div class="pw-meter-bar fp-bar"><i></i><i></i><i></i><i></i></div>'+
-        '<div class="pw-meter-txt"><span>密码强度</span><span class="pm-label" id="fpMeterLabel"></span></div>'+
+        '<div class="pw-meter-txt"><span id="fpMeterCount">已满足 0/4</span><span class="pm-label" id="fpMeterLabel"></span></div>'+
       '</div>'+
       '<div class="auth-field"><label>确认新密码</label><input type="password" id="fpPw2" placeholder="再次输入新密码" autocomplete="new-password"></div>'+
       '<div class="auth-err show" id="fpErr" style="display:none"></div>'+
@@ -1103,6 +1106,8 @@ function updateFpMeter(){
   for(var i=0;i<bars.length;i++){
     if(bars[i].style)bars[i].style.background=(pw&&i<st.level)?st.color:'var(--line)';
   }
+  var ct=$('#fpMeterCount');
+  if(ct)ct.textContent='已满足 '+st.met+'/4'+(st.met===4?' · 全部达标':'');
   var lb=$('#fpMeterLabel');
   if(lb){
     lb.textContent=pw?st.label:'';
