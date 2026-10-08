@@ -228,7 +228,14 @@ function runTests(){
   chk('逐条点亮-段数随条件递增',pwStrength('ABC').level<pwStrength('abcdef').level&&pwStrength('abcdef').level<pwStrength('Abcdef').level&&pwStrength('Abcdef').level<pwStrength('Abcdef!').level,true);
   chk('逐条点亮-计数元数据准确',pwStrength('Abcdef').met,3);
   chk('未达标提示还差项数',pwStrength('Abcdef').label.indexOf('还差 1 项')>=0,true);
-  chk('四条达标文案切换',pwStrength('Abc!23').label,'达标');
+  chk('四条达标文案切换',pwStrength('Abc!23').label,'全部达标');
+  chk('用户示例Yan@123全部达标',pwStrength('Yan@123').label,'全部达标');
+  chk('恰6字符四规则即全部达标',pwStrength('Yan@12').label,'全部达标');
+  chk('不足6字符一律判弱',pwStrength('Ab@c').label.indexOf('弱')===0,true);
+  chk('不足6字符判弱含提示',pwStrength('Ab@c').label.indexOf('不足 6 字符')>=0,true);
+  chk('不足6字符段数仍递进',pwStrength('Ab@c').level,3);
+  chk('不足6字符不ok',pwStrength('Ab@c').ok,false);
+  chk('不足6字符高亮为弱色',pwStrength('Ab@c').color,'#C7391B');
   chk('不合规密码不再误标强度',pwStrength('abc').ok,false);
   chk('强密码返回强档以上',['强','极强'].indexOf(pwStrength('Zh!xu2026#Studying').label)>=0,true);
   chk('极强档示例可达',pwStrength('Zh!!xu2026#Studying').label,'极强');
