@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>智序 · 科学学习编排引擎</title>
+<title>云帆 · AI 学习领航引擎</title>
 <meta name="description" content="基于认知科学与动机心理学的学习任务编排系统，面向期末、考研、考公复习">
 <link rel="preconnect" href="https://fonts.loli.net">
 <link href="https://fonts.loli.net/css2?family=Noto+Sans+SC:wght@400;500;700&family=Noto+Serif+SC:wght@600;700;900&display=swap" rel="stylesheet">
@@ -485,9 +485,9 @@ input:focus{border-color:var(--cinnabar)}
 <div id="splash">
   <canvas id="splashFx"></canvas>
   <div class="sp-inner">
-    <div class="sp-seal">序</div>
-    <h1 class="sp-title">智序</h1>
-    <p class="sp-tag">科学学习编排引擎</p>
+    <div class="sp-seal">帆</div>
+  <h1 class="sp-title">云帆</h1>
+  <p class="sp-tag">长风破浪 · 云帆济海 —— AI 学习领航引擎</p>
     <p class="sp-desc">认知科学定骨架 · AI 做个性化<br>为期末、考研、考公复习，生成有据可查的每日功课时表</p>
     <div class="sp-chips">
       <span class="sp-chip">9 项实证研究</span>
@@ -502,10 +502,10 @@ input:focus{border-color:var(--cinnabar)}
 <div id="app">
   <aside id="sidebar">
     <div class="brand">
-      <div class="seal">序</div>
+      <div class="seal">帆</div>
       <div>
-        <div class="brand-name">智序</div>
-        <div class="brand-sub">科学学习编排引擎</div>
+        <div class="brand-name">云帆</div>
+        <div class="brand-sub">AI 学习领航引擎</div>
       </div>
     </div>
     <nav id="nav"></nav>
@@ -984,9 +984,9 @@ function renderAuth(){
     '</div>';
   el.innerHTML=
   '<div class="card auth-card">'+
-    '<div class="auth-seal">序</div>'+
-    '<div class="auth-title">智序</div>'+
-    '<div class="auth-sub">科学学习编排引擎 · 账号登录</div>'+
+    '<div class="auth-seal">帆</div>'+
+  '<div class="auth-title">云帆</div>'+
+  '<div class="auth-sub">AI 学习领航引擎 · 账号登录</div>'+
     '<div class="auth-tabs">'+
       '<button class="auth-tab'+(isReg?'':' on')+'" data-act="auth-mode" data-m="login">登 录</button>'+
       '<button class="auth-tab'+(isReg?' on':'')+'" data-act="auth-mode" data-m="register">注 册</button>'+
@@ -1068,7 +1068,7 @@ function authSubmit(){
   renderNav();
   switchView('today');
   if(!state.onboarded)setTimeout(openOnboarding,300);
-  toast(authMode==='register'?'注册成功，欢迎加入智序':'欢迎回来，'+res.email);
+  toast(authMode==='register'?'注册成功，欢迎登上云帆':'欢迎回来，'+res.email);
 }
 function authGuest(){
   setSession(null);
@@ -1082,9 +1082,9 @@ function authGuest(){
 function renderForgotAuth(el){
   el.innerHTML=
   '<div class="card auth-card">'+
-    '<div class="auth-seal">序</div>'+
-    '<div class="auth-title">智序</div>'+
-    '<div class="auth-sub">科学学习编排引擎 · 重置密码</div>'+
+    '<div class="auth-seal">帆</div>'+
+  '<div class="auth-title">云帆</div>'+
+  '<div class="auth-sub">AI 学习领航引擎 · 重置密码</div>'+
     '<div class="auth-err" id="authErr"></div>'+
     '<div class="auth-field"><label>QQ 邮箱</label><input type="text" id="fpEmail" placeholder="字母或数字，如 study2026@qq.com" autocomplete="username"></div>'+
     '<div class="auth-field"><label>新密码</label><input type="password" id="fpPw" placeholder="请输入新密码" autocomplete="new-password"></div>'+
@@ -1512,7 +1512,7 @@ function optCard(field,val,title,sub,cur){
 }
 
 /* ---------- AI 教练 ---------- */
-var AI_SYS='你是「智序」学习系统的 AI 教练。智序是基于认知科学与动机心理学的学习任务编排引擎，核心规则：间隔重复（+1/+3/+7天复习）、测试效应（每日闭卷自测）、交错练习（多科混合出题）、认知负荷理论（攻坚块对齐精力峰值）、自我效能感（擅长科目开场制造首胜）、蔡加尼克效应（留悬念题收尾）、渐进原则（进展可见可感）。你的回复规则：用中文；直接给结论、不客套；总长度不超过220字；给建议时注明所依据的科学原理；不得改变上述科学规则，只做个性化解释与微调建议。';
+var AI_SYS='你是「云帆」AI 学习领航引擎的学习教练。云帆基于认知科学与动机心理学的学习任务编排引擎，核心规则：间隔重复（+1/+3/+7天复习）、测试效应（每日闭卷自测）、交错练习（多科混合出题）、认知负荷理论（攻坚块对齐精力峰值）、自我效能感（擅长科目开场制造首胜）、蔡加尼克效应（留悬念题收尾）、渐进原则（进展可见可感）。你的回复规则：用中文；直接给结论、不客套；总长度不超过220字；给建议时注明所依据的科学原理；不得改变上述科学规则，只做个性化解释与微调建议。';
 var AI_TASKS={
   diagnose:{
     title:'学情诊断',en:'AI Diagnosis',
@@ -1637,7 +1637,7 @@ function renderScience(){
   var view=$('#view-science');
   var keys=['selfefficacy','progress','cognitiveload','testing','interleaving','spacing','zeigarnik','sdt','egodepletion'];
   var html='<div class="page-head"><div><div class="page-title">科学依据</div><div class="page-sub">每一个排序决定，背后都有一条可查证的实证研究</div></div></div><div class="rule"></div>'+
-    '<div class="sci-intro card"><p>智序采用「双引擎」架构：认知科学做硬骨架——以下九条经过同行评议的研究（含元分析与大规模预注册复现）构成不可妥协的排序规则；AI 大模型做软个性化——学情诊断、每日复盘与编排解释（见「AI教练」页）。与让 AI 自由发挥的"黑箱课表"不同，智序的每个安排都可解释、可溯源：AI 负责因人而异的解释与微调，但不改变已被验证的科学结论。点击今日时表上的标签，可查看某个任务块的具体依据。</p></div><div class="sci-grid">';
+    '<div class="sci-intro card"><p>云帆采用「双引擎」架构：认知科学做硬骨架——以下九条经过同行评议的研究（含元分析与大规模预注册复现）构成不可妥协的排序规则；AI 大模型做软个性化——学情诊断、每日复盘与编排解释（见「AI教练」页）。与让 AI 自由发挥的"黑箱课表"不同，云帆的每个安排都可解释、可溯源：AI 负责因人而异的解释与微调，但不改变已被验证的科学结论。点击今日时表上的标签，可查看某个任务块的具体依据。</p></div><div class="sci-grid">';
   for(var i=0;i<keys.length;i++){
     var s=SCI[keys[i]];
     html+='<div class="sci-card card"><h3>'+s.name+'<span class="sci-en">'+s.en+'</span></h3>'+
@@ -1725,7 +1725,7 @@ function renderOb(){
   for(var i=1;i<=3;i++)h+='<div class="ob-step'+(ob.step===i?' on':'')+'"></div>';
   h+='</div>';
   if(ob.step===1){
-    h+='<h3>欢迎来到智序</h3><div class="m-sub">三步完成设置，之后引擎每天为你生成有科学依据的功课时表</div>'+
+    h+='<h3>欢迎登上云帆</h3><div class="m-sub">三步完成设置，之后引擎每天为你生成有科学依据的功课时表</div>'+
     '<div class="m-body"><div class="ob-type-grid">'+
       obType('kaoyan','考研','政治 / 英语 / 数学 / 专业课')+
       obType('qimo','期末考','高数 / 英语 / 专业课 / 思政')+
@@ -1896,7 +1896,7 @@ document.addEventListener('click',function(e){
     var blob=new Blob([JSON.stringify(state,null,2)],{type:'application/json'});
     var a=document.createElement('a');
     a.href=URL.createObjectURL(blob);
-    a.download='zhixu-data-'+d+'.json';
+    a.download='yunfan-data-'+d+'.json';
     document.body.appendChild(a);a.click();
     setTimeout(function(){URL.revokeObjectURL(a.href);a.remove()},400);
     toast('数据已导出');return;
