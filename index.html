@@ -374,6 +374,18 @@ input:focus{border-color:var(--cinnabar)}
 @keyframes acctPulse{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.45);opacity:.55}}
 @media (prefers-reduced-motion: reduce){.acct-ava.guest::after{animation:none}}
 
+/* ---------- 验证码登录 ---------- */
+.code-row{display:flex;gap:8px}
+.code-row input{flex:1;min-width:0}
+.code-send{flex-shrink:0;white-space:nowrap;font-size:13px;padding:8px 14px}
+.code-send[disabled]{opacity:.55;cursor:not-allowed}
+.code-mail{background:var(--paper);border:1px solid var(--line);border-radius:var(--r);padding:14px 16px;text-align:center}
+.cm-from{font-size:11.5px;color:var(--ink-faint);margin-bottom:8px}
+.cm-sub{font-size:13px;color:var(--ink-soft);margin-bottom:10px}
+.cm-code{font-family:var(--font-num);font-size:30px;font-weight:700;letter-spacing:.35em;text-indent:.35em;color:var(--cinnabar);margin-bottom:10px}
+.cm-tip{font-size:11.5px;color:var(--ink-faint)}
+.code-demo-tip{font-size:11.5px;color:var(--ink-faint);margin-top:10px;line-height:1.6}
+
 /* ---------- 弹窗 / Toast ---------- */
 .modal-mask{
   position:fixed;inset:0;background:rgba(35,39,47,.42);backdrop-filter:blur(3px);
@@ -959,6 +971,9 @@ function confirmModal(text,onOk){
 
 /* ================= 登录界面 ================= */
 var authMode='login',lastAuthEmail='';
+var codeLogin={email:'',code:'',expire:0};
+var codeCd=0,codeCdTimer=null;
+function genCode(){return String(Math.floor(100000+Math.random()*900000))}
 function showAuth(mode){
   authMode=mode||'login';
   var el=$('#auth');
@@ -971,6 +986,7 @@ function renderAuth(){
   var el=$('#auth');
   if(!el)return;
   if(authMode==='forgot'){renderForgotAuth(el);return}
+  if(authMode==='code'){renderCodeAuth(el);return}
   var isReg=authMode==='register';
   var pwReqHtml=
     '<div class="pw-req">'+
@@ -1004,7 +1020,7 @@ function renderAuth(){
     '<div class="auth-links">'+
       (isReg
         ?'<button data-act="auth-guest">先逛逛 · 游客模式</button><button data-act="auth-mode" data-m="login">已有账号？去登录</button>'
-        :'<button class="fp-btn" data-act="auth-forgot">忘记密码？</button><button data-act="auth-guest">先逛逛 · 游客模式</button><button data-act="auth-mode" data-m="register">没有账号？去注册</button>')+
+        :'<button class="fp-btn" data-act="auth-forgot">忘记密码？</button><button data-act="auth-guest">先逛逛 · 游客模式</button><button data-act="auth-mode" data-m="register">没有账号？去注册</button><button class="fp-btn" data-act="auth-code">验证码登录</button>')+
     '</div>'+
     '<div class="auth-note">本账号体系为本机实现：密码经 SHA-256 加盐哈希后仅存于本机浏览器，不上传任何服务器；同一浏览器内多账号数据相互隔离，更换设备需重新注册。</div>'+
   '</div>';
@@ -1078,6 +1094,98 @@ function authGuest(){
   switchView('today');
   if(!state.onboarded)setTimeout(openOnboarding,300);
   toast('以游客模式进入 · 数据仍保存在本机');
+}
+function renderCodeAuth(el){
+  el.innerHTML=
+  '<div class="card auth-card">'+
+    '<div class="auth-seal">帆</div>'+
+    '<div class="auth-title">云帆</div>'+
+    '<div class="auth-sub">AI 学习领航引擎 · 验证码登录</div>'+
+    '<div class="auth-err" id="authErr"></div>'+
+    '<div class="auth-field"><label>QQ 邮箱</label><input type="text" id="cdEmail" placeholder="字母或数字，如 study2026@qq.com" autocomplete="username"></div>'+
+    '<div class="auth-field"><label>验证码</label><div class="code-row">'+
+      '<input type="text" id="cdCode" placeholder="6 位数字验证码" maxlength="6" inputmode="numeric" autocomplete="one-time-code">'+
+      '<button class="btn btn-ghost code-send" id="cdSendBtn" data-act="auth-code-send">获取验证码</button>'+
+    '</div></div>'+
+    '<button class="btn btn-primary" style="width:100%;justify-content:center;margin-top:4px" data-act="auth-code-submit">登 录</button>'+
+    '<div class="auth-links"><button data-act="auth-guest">先逛逛 · 游客模式</button><button data-act="auth-back-pw">返回密码登录</button></div>'+
+    '<div class="auth-note">验证码登录仅支持已注册账号，验证码 5 分钟内有效。本账号体系为本机实现（无服务器），验证码经页面通知送达而非真实邮件。</div>'+
+  '</div>';
+  var em=$('#cdEmail');
+  if(em){
+    var cur=getSession();
+    if(lastAuthEmail)em.value=lastAuthEmail;
+    else if(cur)em.value=cur;
+    if(typeof em.focus==='function')em.focus();
+  }
+  var card=el.querySelector('.auth-card');
+  if(card&&card.classList)card.classList.add('auth-flip');
+}
+function startCodeCd(){
+  var btn=$('#cdSendBtn');
+  if(!btn)return;
+  codeCd=60;
+  if(btn.setAttribute)btn.setAttribute('disabled','disabled');
+  if(btn.textContent!==undefined)btn.textContent='60s 后重发';
+  if(codeCdTimer&&typeof clearInterval==='function')clearInterval(codeCdTimer);
+  if(typeof setInterval!=='function')return;
+  codeCdTimer=setInterval(function(){
+    codeCd--;
+    var b=$('#cdSendBtn');
+    if(!b){
+      clearInterval(codeCdTimer);codeCdTimer=null;return;
+    }
+    if(codeCd<=0){
+      clearInterval(codeCdTimer);codeCdTimer=null;codeCd=0;
+      if(b.textContent!==undefined)b.textContent='重新获取';
+      if(b.removeAttribute)b.removeAttribute('disabled');
+      return;
+    }
+    if(b.textContent!==undefined)b.textContent=codeCd+'s 后重发';
+  },1000);
+}
+function sendCode(){
+  var emEl=$('#cdEmail');
+  var em=emEl?String(emEl.value||'').trim().toLowerCase():'';
+  if(!validateQQEmail(em)){authError('请输入正确的 QQ 邮箱（字母或数字 @qq.com）');return}
+  if(!getAccounts()[em]){authError('该邮箱尚未注册，请先注册或改用密码登录');return}
+  codeLogin={email:em,code:genCode(),expire:Date.now()+5*60*1000};
+  lastAuthEmail=em;
+  openModal(
+    '<h3>验证码邮件已送达</h3><div class="m-body">'+
+      '<div class="code-mail">'+
+        '<div class="cm-from">云帆账号中心 &lt;noreply@yunfan.study&gt;</div>'+
+        '<div class="cm-sub">您的登录验证码</div>'+
+        '<div class="cm-code">'+codeLogin.code+'</div>'+
+        '<div class="cm-tip">验证码 5 分钟内有效。如非本人操作，请忽略此邮件。</div>'+
+      '</div>'+
+      '<p class="code-demo-tip">演示环境说明：本系统为纯前端实现，无邮件服务器，此通知即为验证码的送达方式；正式部署时接入邮件服务即可。</p>'+
+    '</div>'+
+    '<div class="m-actions"><button class="btn btn-primary" data-act="close-modal">我知道了</button></div>'
+  );
+  startCodeCd();
+}
+function verifyCodeLogin(em,cd){
+  if(!validateQQEmail(em))return{err:'请输入正确的 QQ 邮箱（字母或数字 @qq.com）'};
+  if(!/^\d{6}$/.test(cd))return{err:'请输入 6 位数字验证码'};
+  if(!codeLogin.code||codeLogin.email!==em)return{err:'请先获取该邮箱的验证码'};
+  if(Date.now()>codeLogin.expire)return{err:'验证码已过期，请重新获取'};
+  if(cd!==codeLogin.code)return{err:'验证码不正确'};
+  setSession(em);
+  return{ok:true,email:em};
+}
+function codeSubmit(){
+  var emEl=$('#cdEmail'),cdEl=$('#cdCode');
+  var em=emEl?String(emEl.value||'').trim().toLowerCase():'';
+  var cd=cdEl?String(cdEl.value||'').trim():'';
+  var res=verifyCodeLogin(em,cd);
+  if(res.err){authError(res.err);return}
+  switchStorage();
+  hideAuth();
+  renderNav();
+  switchView('today');
+  if(!state.onboarded)setTimeout(openOnboarding,300);
+  toast('验证通过，欢迎回来，'+res.email);
 }
 function renderForgotAuth(el){
   el.innerHTML=
@@ -1916,6 +2024,10 @@ document.addEventListener('click',function(e){
   if(act==='auth-forgot'){authMode='forgot';renderAuth();return}
   if(act==='auth-forgot-submit'){resetPw();return}
   if(act==='auth-back-login'){authMode='login';renderAuth();return}
+  if(act==='auth-code'){authMode='code';renderAuth();return}
+  if(act==='auth-code-send'){sendCode();return}
+  if(act==='auth-code-submit'){codeSubmit();return}
+  if(act==='auth-back-pw'){authMode='login';renderAuth();return}
   if(act==='logout'){logoutAccount();return}
   if(act==='del-account'){deleteAccount();return}
   if(act==='show-auth'){showAuth('login');return}
@@ -2294,6 +2406,7 @@ document.addEventListener('keydown',function(e){
   var au=$('#auth');
   if(au&&au.classList&&au.classList.contains&&!au.classList.contains('hide')){
     if(authMode==='forgot')resetPw();
+    else if(authMode==='code')codeSubmit();
     else authSubmit();
   }
 });

@@ -263,6 +263,24 @@ function runTests(){
   chk('字母邮箱注册成功',registerAccount('studylife@qq.com','Good!Pass1').ok===true,true);
   chk('字母邮箱登录成功',loginAccount('studylife@qq.com','Good!Pass1').ok===true,true);
 
+  chk('验证码登录-入口在登录页右下',/没有账号？去注册<\/button><button class="fp-btn" data-act="auth-code">验证码登录/.test(html),true);
+  chk('验证码登录-界面为邮箱加验证码两栏',/id="cdEmail"/.test(html)&&/id="cdCode"/.test(html),true);
+  chk('验证码登录-可返回密码登录',/data-act="auth-back-pw">返回密码登录/.test(html),true);
+  chk('验证码登录-验证码生成6位数字',/^\d{6}$/.test(genCode()),true);
+  chk('验证码登录-过期验证码被拒',(function(){codeLogin={email:'123456789@qq.com',code:'123456',expire:Date.now()-1};return verifyCodeLogin('123456789@qq.com','123456').err!==undefined})(),true);
+  codeLogin={email:'123456789@qq.com',code:'123456',expire:Date.now()+300000};
+  chk('验证码登录-邮箱未获取验证码被拒',verifyCodeLogin('222222222@qq.com','123456').err!==undefined,true);
+  chk('验证码登录-非6位数字被拒',verifyCodeLogin('123456789@qq.com','12345').err!==undefined,true);
+  chk('验证码登录-错误验证码被拒',verifyCodeLogin('123456789@qq.com','654321').err!==undefined,true);
+  chk('验证码登录-正确验证码通过',verifyCodeLogin('123456789@qq.com','123456').ok===true,true);
+  chk('验证码登录-登录后数据键切换',dataKey(),'zhixu_u_123456789@qq.com');
+  startCodeCd();
+  chk('验证码登录-发送后60秒内禁发',codeCd,60);
+  chk('验证码登录-邮件通知卡片样式存在',/code-mail/.test(html)&&/cm-code/.test(html),true);
+  chk('验证码登录-验证码五分钟有效期',/5 分钟内有效/.test(html),true);
+  chk('验证码登录-回车键路由到验证码提交',/authMode==='code'\)codeSubmit\(\)/.test(html),true);
+  clearSession();
+
   chk('启动页提示文案已按要求删除',html.indexOf('光标所至')<0,true);
   chk('启动页脚样式已清理',html.indexOf('sp-foot')<0,true);
 
