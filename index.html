@@ -471,6 +471,55 @@ input:focus{border-color:var(--cinnabar)}
 .sp-chips{animation-delay:.45s}
 .sp-enter{animation-delay:.55s}
 
+/* ---------- 暖心护航 ---------- */
+.mood-quick{display:flex;align-items:center;gap:12px;padding:12px 18px;margin-bottom:18px;flex-wrap:wrap}
+.mq-label{font-size:14px;font-weight:700}
+.mq-btns{display:flex;gap:8px}
+.mq-btn{width:34px;height:34px;border-radius:50%;border:1.5px solid var(--line-strong);background:var(--card);display:flex;align-items:center;justify-content:center;transition:all .15s}
+.mq-btn:hover{transform:scale(1.15);border-color:var(--ink-faint)}
+.mind-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:16px;align-items:start}
+.mind-card{padding:22px 24px}
+.mind-card h3{font-family:var(--font-display);font-size:17px;margin-bottom:6px;letter-spacing:.04em}
+.mind-card .mc-sub{font-size:12.5px;color:var(--ink-faint);margin-bottom:14px;line-height:1.6}
+.mood-row{display:flex;gap:9px;flex-wrap:wrap}
+.mood-btn{border:1.5px solid var(--line-strong);border-radius:99px;padding:8px 16px;background:var(--card);display:flex;align-items:center;gap:8px;font-size:13.5px;transition:all .15s}
+.mood-btn:hover{border-color:var(--ink-faint)}
+.mood-btn.sel{border-color:var(--cinnabar);background:var(--cinnabar-wash);color:var(--cinnabar-deep);font-weight:700}
+.mood-dot{width:13px;height:13px;border-radius:50%;flex-shrink:0}
+.mood-week{display:flex;gap:7px;align-items:flex-end;height:96px;margin:6px 0 4px}
+.mood-day{flex:1;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;gap:5px;height:100%}
+.mood-bar{width:100%;border-radius:6px 6px 0 0;min-height:6px}
+.mood-day .md-l{font-size:10.5px;color:var(--ink-faint);font-family:var(--font-num)}
+.care-box{border:1.5px dashed var(--line-strong);border-radius:var(--r);background:linear-gradient(120deg,rgba(47,107,94,.06),rgba(154,123,36,.06));padding:14px 16px;margin-top:14px;font-size:13.5px;color:var(--ink-soft);line-height:1.9}
+.crisis-box{border:1.5px solid #E4B8AA;border-radius:var(--r);background:var(--cinnabar-wash);padding:14px 16px;margin-top:14px;font-size:13.5px;color:var(--cinnabar-deep);line-height:1.9}
+.hotline{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:9px 0;border-bottom:1px dashed var(--line)}
+.hotline:last-of-type{border-bottom:none}
+.hotline b{font-family:var(--font-num);font-size:19px;color:var(--cinnabar)}
+.br-stage{padding:6px 0 2px}
+.br-circle{
+  width:150px;height:150px;border-radius:50%;margin:0 auto;
+  background:var(--pine-wash);border:3px solid var(--pine);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;
+  transform:scale(.72);
+}
+.br-circle b{font-family:var(--font-display);font-size:19px;color:var(--pine)}
+.br-circle .num{font-size:15px;color:var(--ink-soft)}
+
+/* ---------- 考试节点管家 ---------- */
+.node-row{display:flex;align-items:center;gap:12px;padding:10px 14px;border:1px solid var(--line);border-radius:var(--r);background:var(--paper);margin-bottom:8px;flex-wrap:wrap}
+.node-row .node-label{flex:1;min-width:120px;font-size:14px;font-weight:500}
+.node-row .node-date{font-family:var(--font-num);font-size:12.5px;color:var(--ink-faint)}
+.node-row .node-dd{font-size:12.5px;color:var(--ink-soft);background:var(--card);border:1px solid var(--line-strong);border-radius:99px;padding:2px 10px;white-space:nowrap}
+.node-row .node-dd.urgent{color:#FDF8EE;background:var(--cinnabar);border-color:var(--cinnabar)}
+.node-form{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.node-form input[type=text]{flex:1;min-width:160px}
+.countdown-chip.node-chip{border-color:#E4B8AA;background:var(--cinnabar-wash);color:var(--cinnabar-deep)}
+.countdown-chip.node-chip b{color:var(--cinnabar-deep)}
+
+/* ---------- 无障碍 ---------- */
+body.bigfont{zoom:1.16}
+:focus-visible{outline:2px solid var(--cinnabar);outline-offset:2px}
+
 /* ---------- 移动端 ---------- */
 #tabbar{display:none}
 @media (max-width:900px){
@@ -502,9 +551,11 @@ input:focus{border-color:var(--cinnabar)}
   <p class="sp-tag">长风破浪 · 云帆济海 —— AI 学习领航引擎</p>
     <p class="sp-desc">认知科学定骨架 · AI 做个性化<br>为期末、考研、考公复习，生成有据可查的每日功课时表</p>
     <div class="sp-chips">
-      <span class="sp-chip">9 项实证研究</span>
+      <span class="sp-chip">10 项实证研究</span>
       <span class="sp-chip">六块式科学时表</span>
       <span class="sp-chip">AI 学习教练</span>
+      <span class="sp-chip">暖心护航 · 情绪关怀</span>
+      <span class="sp-chip">公益 · 核心功能永久免费</span>
     </div>
     <button class="btn btn-primary sp-enter" data-act="enter-app">进入系统</button>
     
@@ -535,13 +586,14 @@ input:focus{border-color:var(--cinnabar)}
     <section class="view" id="view-plan"></section>
     <section class="view" id="view-subjects"></section>
     <section class="view" id="view-profile"></section>
+    <section class="view" id="view-mind"></section>
     <section class="view" id="view-coach"></section>
     <section class="view" id="view-science"></section>
   </main>
 </div>
 <nav id="tabbar"></nav>
 <div id="modal-root"></div>
-<div id="toast-root"></div>
+<div id="toast-root" aria-live="polite"></div>
 
 <script>
 'use strict';
@@ -600,7 +652,11 @@ var SCI={
   egodepletion:{name:'意志力损耗之争',en:'Ego Depletion Debate',
     why:'「先做难任务以防意志力耗尽」的经典理论，在 23 个实验室、2000+ 人的大规模预注册复现中效应接近零，已不足为据。',
     apply:'本系统不采用「先难后易防耗尽」的排序逻辑，而依据紧迫度、掌握度与个人优势科学排序。',
-    cite:'Hagger, M. et al. (2016). A multilab preregistered replication of the ego-depletion effect.'}
+    cite:'Hagger, M. et al. (2016). A multilab preregistered replication of the ego-depletion effect.'},
+  selfcompassion:{name:'自我关怀',en:'Self-Compassion',
+    why:'对挫折采取理解而非苛责的态度，与更低的表现焦虑、更强的坚持性和更快的状态恢复相关。备考是长跑，善待自己不是松懈，而是续航。',
+    apply:'连击中断、状态低迷时，系统给出理解性反馈而非愧疚式提醒，并主动提供呼吸放松与专业求助入口。',
+    cite:'Neff, K. (2003). Self-compassion: An alternative conceptualization of a healthy attitude toward oneself.'}
 };
 var TYPES={
   opener:{label:'首胜开场',sci:'selfefficacy'},
@@ -626,7 +682,7 @@ function setSession(email){
 function clearSession(){localStorage.removeItem(SESSION_KEY)}
 function dataKey(){var e=sessionEmail();return e?('zhixu_u_'+e):BASE_KEY}
 var KEY=dataKey();
-var DEF={profile:null,subjects:[],plans:{},completions:{},learnedLog:[],streak:{last:'',n:0},onboarded:false,aiConfig:null};
+var DEF={profile:null,subjects:[],plans:{},completions:{},learnedLog:[],streak:{last:'',n:0},onboarded:false,aiConfig:null,moods:{},nodes:[],bigFont:false};
 var state=loadState();
 function switchStorage(){KEY=dataKey();state=loadState()}
 
@@ -760,9 +816,17 @@ function loginAccount(email,pw){
 function loadState(){
   try{
     var s=JSON.parse(localStorage.getItem(KEY));
-    if(s&&typeof s==='object')return Object.assign({},DEF,s);
+    if(s&&typeof s==='object'){
+      var st=Object.assign({},DEF,s);
+      st.moods=Object.assign({},(s.moods&&typeof s.moods==='object'&&!Array.isArray(s.moods))?s.moods:null);
+      st.nodes=Array.isArray(s.nodes)?s.nodes.slice():[];
+      if(typeof st.bigFont!=='boolean')st.bigFont=false;
+      return st;
+    }
   }catch(e){}
-  return JSON.parse(JSON.stringify(DEF));
+  var fresh=JSON.parse(JSON.stringify(DEF));
+  fresh.moods={};fresh.nodes=[];
+  return fresh;
 }
 function save(){try{localStorage.setItem(KEY,JSON.stringify(state))}catch(e){}}
 function nameOf(id){for(var i=0;i<state.subjects.length;i++){if(state.subjects[i].id===id)return state.subjects[i].name}return '已移除科目'}
@@ -1341,6 +1405,7 @@ var NAVS=[
   {id:'plan',label:'排期',icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="3.5" y="5" width="17" height="15.5" rx="2.5"/><path d="M3.5 9.8h17M8 2.8V6M16 2.8V6M7.8 13.5h3M7.8 17h6"/></svg>'},
   {id:'subjects',label:'科目',icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 5.5A2 2 0 0 1 6 3.5h4.5v17H6a2 2 0 0 1-2-2zM20 5.5a2 2 0 0 0-2-2h-4.5v17H18a2 2 0 0 0 2-2z"/><path d="M12 7.8v8.4"/></svg>'},
   {id:'profile',label:'习惯',icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="8.2" r="3.6"/><path d="M4.8 20.2c1.2-3.4 4-5.2 7.2-5.2s6 1.8 7.2 5.2"/></svg>'},
+  {id:'mind',label:'暖心',icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20.3S4.2 15.2 4.2 9.8a4.3 4.3 0 0 1 7.8-2.5 4.3 4.3 0 0 1 7.8 2.5c0 5.4-7.8 10.5-7.8 10.5z"/></svg>'},
   {id:'coach',label:'AI教练',icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M20.5 11.5c0 4.1-3.8 7.4-8.5 7.4-1 0-2-.15-2.9-.42L4.5 19.8l1.2-3.1A7.1 7.1 0 0 1 3.5 11.5c0-4.1 3.8-7.4 8.5-7.4s8.5 3.3 8.5 7.4z"/><path d="M8.6 11.5h6.8M8.6 8.6h4.2"/></svg>'},
   {id:'science',label:'科学',icon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M9.5 3.5h5M10.5 3.5v6.2L5.6 17.6A2 2 0 0 0 7.3 20.6h9.4a2 2 0 0 0 1.7-3l-4.9-7.9V3.5M8 14.5h8"/></svg>'}
 ];
@@ -1379,6 +1444,7 @@ function switchView(v){
   if(v==='plan')renderPlan();
   if(v==='subjects')renderSubjects();
   if(v==='profile')renderProfile();
+  if(v==='mind')renderMind();
   if(v==='coach')renderCoach();
   if(v==='science')renderScience();
   window.scrollTo(0,0);
@@ -1399,11 +1465,13 @@ function renderToday(){
   for(var i=0;i<ne.length;i++){
     chips+='<span class="countdown-chip">距 <b>'+esc(ne[i].s.name)+'</b> <span class="sub">还有</span> <b>'+ne[i].d+'</b> <span class="sub">天 · '+ne[i].s.examDate.slice(5)+'</span></span>';
   }
+  chips+=nodeChipsHtml(d);
   var head=
     '<div class="page-head"><div><div class="page-title">今日功课时表</div>'+
     '<div class="page-sub">'+d.slice(0,4)+' 年 '+(+d.slice(5,7))+' 月 '+(+d.slice(8,10))+' 日 · '+wkCN(d)+'</div></div></div>'+
     '<div class="rule"></div>'+
-    (chips?'<div class="today-meta">'+chips+'</div>':'');
+    (chips?'<div class="today-meta">'+chips+'</div>':'')+
+    quickMoodHtml();
 
   if(!subs.length){
     view.innerHTML=head+
@@ -1477,7 +1545,8 @@ function renderToday(){
     '<div class="today-actions">'+
       '<button class="btn btn-ghost" data-act="why">为什么这样安排？</button>'+
       '<button class="btn btn-ghost" data-act="regen">重新生成</button>'+
-    '</div>';
+    '</div>'+
+    '<div class="empty-note" style="margin-top:26px">云帆公益版 · 核心功能永久免费 — 让每一位自习室里的同学，都用得起科学的学习编排。数据仅存本机，隐私无忧。</div>';
   view.innerHTML=html;
   $('#streakN').textContent=state.streak.n;
 }
@@ -1503,6 +1572,24 @@ function renderPlan(){
   }
   html+='<div class="exam-cards">'+ecards+'</div>';
 
+  html+='<div class="pf-card card" style="max-width:100%;margin-bottom:22px"><h3>考试节点管家</h3>'+
+    '<p style="font-size:12.5px;color:var(--ink-faint);margin:-8px 0 14px;line-height:1.7">报名、网上确认、打印准考证……错过一个节点，全年备考白费。录入关键日期，到期自动在「今日」页置顶提醒。</p>';
+  var ns=state.nodes.slice().sort(function(a,b){return a.date<b.date?-1:1});
+  if(ns.length){
+    for(var n2=0;n2<ns.length;n2++){
+      var ndd=diffDays(d0,ns[n2].date);
+      var urg=ndd>=0&&ndd<=3;
+      html+='<div class="node-row"><span class="node-date">'+ns[n2].date+' · '+wkCN(ns[n2].date)+'</span>'+
+        '<span class="node-label">'+esc(ns[n2].label)+'</span>'+
+        '<span class="node-dd'+(urg?' urgent':'')+'">'+(ndd<0?'已过':(ndd===0?'就是今天':'还有 '+ndd+' 天'))+'</span>'+
+        '<button class="btn btn-danger" style="padding:3px 10px;font-size:12px" data-act="node-del" data-id="'+ns[n2].id+'">删除</button></div>';
+    }
+  }else{
+    html+='<p class="muted" style="margin-bottom:10px">还没有录入节点 — 建议先把「报名截止 / 网上确认 / 准考证打印」三个日期加进来。</p>';
+  }
+  html+='<div class="node-form"><input type="text" id="nodeName" placeholder="如：考研网上确认截止 / 准考证打印开始">'+
+    '<input type="date" id="nodeDate" aria-label="节点日期"><button class="btn btn-primary" data-act="node-add">添加节点</button></div></div>';
+
   var legend='<div class="plan-legend">';
   for(i=0;i<subs.length;i++){legend+='<span class="lg"><span class="tag-dot" style="background:'+subs[i].color+'"></span>'+esc(subs[i].name)+'</span>'}
   legend+='</div>';
@@ -1527,6 +1614,7 @@ function renderPlan(){
   }
   html+='<div class="empty-note">临近考试的科目自动获得更高时间权重；掌握度越低权重越高。你更新科目档案后，配比即时重算。</div>';
   view.innerHTML=html;
+  var ndv=$('#nodeDate');if(ndv)ndv.value=addDays(d0,7);
 }
 
 /* ---------- 科目 ---------- */
@@ -1594,6 +1682,10 @@ function renderProfile(){
     optCard('rhythm',50,'深度节奏','50 分钟专注 + 10 分钟休息',p.rhythm)+
   '</div><p class="muted" style="margin-top:12px">两种节奏均有研究支持结构化休息的价值，按个人专注力上限选择即可。</p></div>';
 
+  html+='<div class="pf-card card"><h3>无障碍与显示</h3><div class="opt-cards">'+
+    '<button class="opt-card'+(state.bigFont?' sel':'')+'" data-act="bigfont" data-v="'+(state.bigFont?'off':'on')+'" aria-label="切换大字模式，当前'+(state.bigFont?'已开启':'已关闭')+'"><b>大字模式</b><small>当前：'+(state.bigFont?'已开启，点击关闭':'已关闭，点击开启')+'</small></button>'+
+  '</div><p class="muted" style="margin-top:12px">云帆坚持信息无障碍：全键盘可操作、读屏友好、支持大字模式 — 学习服务的公平，从「人人能用」开始。</p></div>';
+
   var acctEmail=sessionEmail();
   html+='<div class="pf-card card"><h3>账号</h3>'+
     '<p style="font-size:13.5px;color:var(--ink-soft);margin-bottom:12px;line-height:1.7">'+
@@ -1617,6 +1709,136 @@ function renderProfile(){
 }
 function optCard(field,val,title,sub,cur){
   return '<button class="opt-card'+(String(cur)===String(val)?' sel':'')+'" data-act="opt" data-f="'+field+'" data-v="'+val+'"><b>'+title+'</b><small>'+sub+'</small></button>';
+}
+
+/* ---------- 暖心护航（心理守卫） ---------- */
+var MOOD_COLORS=['#C7391B','#C97A2B','#9A7B24','#6E8A3C','#2F6B5E'];
+var MOOD_LABELS=['很差','较差','一般','较好','很好'];
+var CRISIS_WORDS=['不想活','自杀','轻生','活不下去','了无生趣','自残','解脱'];
+function moodColor(s){return MOOD_COLORS[clamp(s,1,5)-1]}
+function moodLabel(s){return MOOD_LABELS[clamp(s,1,5)-1]}
+function quickMoodHtml(){
+  var d=today();
+  if(state.moods[d])return '';
+  var h='<div class="mood-quick card"><span class="mq-label">今天感觉如何？</span><span class="mq-btns" role="group" aria-label="今日情绪快捷打卡">';
+  for(var s=1;s<=5;s++){
+    h+='<button class="mq-btn" data-act="mood-set" data-v="'+s+'" title="情绪 '+moodLabel(s)+'" aria-label="情绪 '+moodLabel(s)+'"><span class="mood-dot" style="background:'+moodColor(s)+'"></span></button>';
+  }
+  h+='</span><button class="btn btn-ghost" data-act="nav" data-v="mind" style="padding:5px 13px;font-size:12.5px">暖心护航</button></div>';
+  return h;
+}
+function nodeChipsHtml(d){
+  var h='';
+  var ns=state.nodes.slice().sort(function(a,b){return a.date<b.date?-1:1});
+  for(var i=0;i<ns.length;i++){
+    var dd=diffDays(d,ns[i].date);
+    if(dd<0||dd>7)continue;
+    h+='<span class="countdown-chip node-chip" title="考试节点提醒 · 数据存于本机">节点 · '+esc(ns[i].label)+' <b>'+(dd===0?'就是今天':'还有 '+dd+' 天')+'</b></span>';
+  }
+  return h;
+}
+function renderMind(){
+  var view=$('#view-mind');
+  var d=today();
+  var m=state.moods[d];
+  var html='<div class="page-head"><div><div class="page-title">暖心护航</div><div class="page-sub">情绪也是学习的一部分 · 状态关怀是普惠服务，不是奢侈品</div></div></div><div class="rule"></div><div class="mind-grid">';
+
+  html+='<div class="mind-card card"><h3>今日情绪打卡</h3><div class="mc-sub">一句话都不用说，点一下就行。数据只存本机，只给你自己看。</div>';
+  html+='<div class="mood-row" role="group" aria-label="今日情绪打卡">';
+  for(var s=1;s<=5;s++){
+    html+='<button class="mood-btn'+(m&&m.score===s?' sel':'')+'" data-act="mood-set" data-v="'+s+'" aria-label="情绪 '+moodLabel(s)+'"><span class="mood-dot" style="background:'+moodColor(s)+'"></span>'+moodLabel(s)+'</button>';
+  }
+  html+='</div>';
+  if(m){
+    html+='<p style="font-size:13px;color:var(--ink-soft);margin-top:12px">今日已打卡：<b>'+moodLabel(m.score)+'</b></p>';
+  }
+  html+='<div style="margin-top:12px"><label class="field-lbl" style="margin:0 0 5px">想多说两句？（可选，仅存本机）</label>'+
+    '<textarea id="mindNote" style="width:100%;min-height:64px;border:1px solid var(--line-strong);border-radius:8px;padding:9px 12px;background:var(--card);outline:none;font-size:13.5px;resize:vertical;font-family:var(--font-body);line-height:1.6" placeholder="例：数学错太多有点崩，但晚上跑步后好些了。">'+esc(m&&m.note?m.note:'')+'</textarea>'+
+    '<button class="btn btn-ghost" style="margin-top:8px" data-act="mood-note">保存心情记录</button></div>';
+  var note=(m&&m.note)||'';
+  var crisis=false;
+  for(var c=0;c<CRISIS_WORDS.length;c++){if(note.indexOf(CRISIS_WORDS[c])>=0)crisis=true}
+  if(crisis){
+    html+='<div class="crisis-box"><b>你此刻的记录让人牵挂。</b><br>如果痛苦难以承受，请立刻拨打「心理援助资源」卡片中的热线，或告诉身边信任的人。你不需要独自扛着，求助是能力，不是软弱。</div>';
+  }else if(m&&m.score<=2){
+    html+='<div class="care-box"><b>状态偏低的一天 — 允许它存在。</b><br>备考是长跑，低谷期可以减量但不弃跑：今天哪怕只完成「首胜开场」一个块，也算赢。<button class="btn btn-primary" style="padding:5px 14px;font-size:12.5px;margin-top:8px" data-act="breathe">做一次 4-7-8 呼吸放松</button></div>';
+  }
+  html+='</div>';
+
+  html+='<div class="mind-card card"><h3>近七日情绪</h3><div class="mc-sub">情绪也有曲线 — 看见它，才能照顾它。</div><div class="mood-week">';
+  var tot=0,cnt=0;
+  for(var k=6;k>=0;k--){
+    var dd2=addDays(d,-k);
+    var mm=state.moods[dd2];
+    var bh=mm?Math.max(mm.score*17,8):6;
+    var col=mm?moodColor(mm.score):'#DCD2BC';
+    var lbl=mm?moodLabel(mm.score):'未记';
+    html+='<div class="mood-day" title="'+dd2+' · '+lbl+'"><div class="mood-bar" style="height:'+bh+'px;background:'+col+'"></div><span class="md-l">'+(+dd2.slice(8,10))+'日</span></div>';
+    if(mm){tot+=mm.score;cnt++}
+  }
+  html+='</div>';
+  if(cnt){
+    var avg=(tot/cnt).toFixed(1);
+    html+='<p class="muted" style="margin-top:10px">近七日已记录 '+cnt+' 天 · 平均 '+avg+' 分。'+(avg<3?'情绪持续偏低时，请优先照顾睡眠与心情，必要时使用下方求助热线。':'整体状态在线，继续保持节奏。')+'</p>';
+  }else{
+    html+='<p class="muted" style="margin-top:10px">还没有记录 — 从今天开始，每天点亮一格。</p>';
+  }
+  html+='</div>';
+
+  html+='<div class="mind-card card"><h3>连击中断，不是失败</h3><div class="mc-sub">当前连击 '+state.streak.n+' 天 · 坚持的本质是「大多数天在场」</div>'+
+    '<p style="font-size:13.5px;color:var(--ink-soft);line-height:1.9">连续打卡的价值在于大多数天在场，而不是一天不落。中断后重新开始的第一天，恰恰是最需要自我关怀的一天 — 苛责只会让重启更难。</p>'+
+    '<button class="sci-chip" data-act="sci" data-sci="selfcompassion">自我关怀 · 为何这样说？</button></div>';
+
+  html+='<div class="mind-card card"><h3>心理援助资源</h3><div class="mc-sub">求助是能力，不是软弱。以下均为官方公益服务。</div>'+
+    '<div class="hotline"><span>共青团青少年服务台 · 学业压力与情绪困扰</span><b>12355</b></div>'+
+    '<div class="hotline"><span>全国统一心理援助热线</span><b>12356</b></div>'+
+    '<div class="hotline"><span>高校心理咨询中心 · 在校学生免费</span><b style="font-size:13px;color:var(--ink-soft);font-family:var(--font-body)">校内预约</b></div>'+
+    '<p class="muted" style="margin-top:10px">出现持续两周以上的情绪低落、失眠、食欲改变，或任何伤害自己的念头时，请务必寻求专业帮助。</p></div>';
+
+  html+='</div>';
+  view.innerHTML=html;
+}
+var brTimer=null;
+function openBreathe(){
+  openModal(
+    '<h3>4-7-8 呼吸放松</h3>'+
+    '<div class="m-sub">跟着圆球的节奏走：吸气 4 秒 · 屏息 7 秒 · 呼气 8 秒 · 共 4 轮</div>'+
+    '<div class="m-body br-stage"><div class="br-circle" id="brCircle"><b id="brPhase">准备</b><span class="num" id="brCnt"></span></div>'+
+    '<p class="muted" style="text-align:center;margin-top:12px">来自瑜伽传统的放松练习，帮助快速平复紧张。如持续感到痛苦，请使用「暖心护航」页的求助热线。</p></div>'+
+    '<div class="m-actions"><button class="btn btn-ghost" data-act="close-modal">结束练习</button></div>'
+  );
+  var phases=[['吸气',4,1.4],['屏息',7,1.4],['呼气',8,0.72]];
+  var pi=0,left=phases[0][1],cyc=0;
+  var circle=$('#brCircle'),ph=$('#brPhase'),ct=$('#brCnt');
+  if(!circle||!ph||!ct)return;
+  function applyPhase(){
+    var p=phases[pi];
+    ph.textContent=p[0];
+    circle.style.transition='transform '+p[1]+'s ease-in-out';
+    circle.style.transform='scale('+p[2]+')';
+  }
+  applyPhase();
+  if(brTimer)clearInterval(brTimer);
+  brTimer=setInterval(function(){
+    if(!document.getElementById('brPhase')){clearInterval(brTimer);brTimer=null;return}
+    left--;
+    ct.textContent=left>0?left:'';
+    if(left<=0){
+      pi++;
+      if(pi>=3){pi=0;cyc++}
+      if(cyc>=4){
+        clearInterval(brTimer);brTimer=null;
+        ph.textContent='完成';ct.textContent='';
+        toast('呼吸练习完成 — 感觉好些了吗',true);
+        return;
+      }
+      left=phases[pi][1];
+      applyPhase();
+    }
+  },1000);
+}
+function applyBigFont(){
+  if(document.body&&document.body.classList)document.body.classList[state.bigFont?'add':'remove']('bigfont');
 }
 
 /* ---------- AI 教练 ---------- */
@@ -1743,9 +1965,9 @@ function runAI(f){
 /* ---------- 科学 ---------- */
 function renderScience(){
   var view=$('#view-science');
-  var keys=['selfefficacy','progress','cognitiveload','testing','interleaving','spacing','zeigarnik','sdt','egodepletion'];
+  var keys=['selfefficacy','progress','cognitiveload','testing','interleaving','spacing','zeigarnik','sdt','egodepletion','selfcompassion'];
   var html='<div class="page-head"><div><div class="page-title">科学依据</div><div class="page-sub">每一个排序决定，背后都有一条可查证的实证研究</div></div></div><div class="rule"></div>'+
-    '<div class="sci-intro card"><p>云帆采用「双引擎」架构：认知科学做硬骨架——以下九条经过同行评议的研究（含元分析与大规模预注册复现）构成不可妥协的排序规则；AI 大模型做软个性化——学情诊断、每日复盘与编排解释（见「AI教练」页）。与让 AI 自由发挥的"黑箱课表"不同，云帆的每个安排都可解释、可溯源：AI 负责因人而异的解释与微调，但不改变已被验证的科学结论。点击今日时表上的标签，可查看某个任务块的具体依据。</p></div><div class="sci-grid">';
+    '<div class="sci-intro card"><p>云帆采用「双引擎」架构：认知科学做硬骨架——以下十条经过同行评议的研究（含元分析与大规模预注册复现）构成不可妥协的排序规则；AI 大模型做软个性化——学情诊断、每日复盘与编排解释（见「AI教练」页）。与让 AI 自由发挥的"黑箱课表"不同，云帆的每个安排都可解释、可溯源：AI 负责因人而异的解释与微调，但不改变已被验证的科学结论。点击今日时表上的标签，可查看某个任务块的具体依据。</p></div><div class="sci-grid">';
   for(var i=0;i<keys.length;i++){
     var s=SCI[keys[i]];
     html+='<div class="sci-card card"><h3>'+s.name+'<span class="sci-en">'+s.en+'</span></h3>'+
@@ -1814,7 +2036,11 @@ var ob={step:1,type:'kaoyan',subjects:[],profile:{wake:'07:30',sleep:'23:30',dai
 var PRESETS={
   kaoyan:[['政治',2,2,3,25],['英语（一）',3,4,5,32],['数学（一）',5,2,2,32],['专业课',4,3,3,40]],
   qimo:[['高等数学',4,2,3,18],['大学英语',3,4,5,25],['专业基础课',3,3,3,25],['思想政治',2,3,4,20]],
-  kaogong:[['行测',4,2,3,30],['申论',3,2,2,30],['公共基础',2,3,3,45]]
+  kaogong:[['行测',4,2,3,30],['申论',3,2,2,30],['公共基础',2,3,3,45]],
+  jiaoshi:[['综合素质',3,2,3,28],['教育知识与能力',4,2,3,35],['学科知识与能力',4,3,3,42]],
+  falu:[['刑法',5,2,2,40],['民法',5,2,2,42],['理论法学',3,2,3,38],['诉讼法综合',4,2,3,45]],
+  ruankao:[['基础知识',3,3,3,30],['应用技术（案例）',4,2,3,38]],
+  cet:[['词汇与听力',3,3,4,26],['阅读精读',3,4,4,30],['写作与翻译',4,2,3,33]]
 };
 function presetSubjects(type){
   var t=today(),ps=PRESETS[type]||[],arr=[],i;
@@ -1838,6 +2064,10 @@ function renderOb(){
       obType('kaoyan','考研','政治 / 英语 / 数学 / 专业课')+
       obType('qimo','期末考','高数 / 英语 / 专业课 / 思政')+
       obType('kaogong','考公','行测 / 申论 / 公基')+
+      obType('jiaoshi','教师资格','综合素质 / 教育知识 / 学科')+
+      obType('falu','法考','刑法 / 民法 / 理论法 / 诉讼法')+
+      obType('ruankao','软考','基础知识 / 应用技术')+
+      obType('cet','四六级','词汇听力 / 阅读 / 写作翻译')+
       obType('custom','自定义','从零录入科目')+
     '</div></div>'+
     '<div class="m-actions"><button class="btn btn-ghost" data-act="ob-skip">稍后设置</button>'+
@@ -2043,6 +2273,48 @@ document.addEventListener('click',function(e){
   if(act==='ai-fill'){
     var t=AI_TASKS[el.getAttribute('data-f')],ta=$('#aiIn-'+el.getAttribute('data-f'));
     if(t&&ta&&t.demo){ta.value=t.demo;ta.focus()}
+    return;
+  }
+  if(act==='mood-set'){
+    var sc=+el.getAttribute('data-v');
+    var ex=state.moods[d]||{};
+    state.moods[d]={score:sc,note:ex.note||''};
+    save();
+    var msgs={5:'已记录 — 状态在线，乘胜追击',4:'已记录 — 不错的状态',3:'已记录 — 平常心也是好状态',2:'已记录 — 状态偏低，记得去「暖心」看看',1:'已记录 — 别硬撑，去「暖心」页休息一下'};
+    toast(msgs[sc]||'已记录');
+    if(curView==='mind')renderMind();else renderToday();
+    return;
+  }
+  if(act==='mood-note'){
+    var ta2=$('#mindNote');
+    var ex2=state.moods[d]||{score:3};
+    ex2.note=ta2?String(ta2.value||''):'';
+    state.moods[d]=ex2;save();
+    toast('心情记录已保存');
+    renderMind();
+    return;
+  }
+  if(act==='breathe'){openBreathe();return}
+  if(act==='node-add'){
+    var nn=$('#nodeName'),nd=$('#nodeDate');
+    var nlabel=nn?String(nn.value||'').trim():'';
+    var ndate=nd?String(nd.value||''):'';
+    if(!nlabel){toast('请填写节点名称');return}
+    if(!ndate){toast('请选择节点日期');return}
+    state.nodes.push({id:uid(),label:nlabel,date:ndate});
+    save();renderPlan();toast('节点已添加 — 到期将在「今日」页提醒');
+    return;
+  }
+  if(act==='node-del'){
+    var nid=el.getAttribute('data-id');
+    state.nodes=state.nodes.filter(function(n){return n.id!==nid});
+    save();renderPlan();toast('节点已删除');
+    return;
+  }
+  if(act==='bigfont'){
+    state.bigFont=el.getAttribute('data-v')==='on';
+    save();applyBigFont();renderProfile();
+    toast(state.bigFont?'大字模式已开启':'大字模式已关闭');
     return;
   }
   if(act==='ob-type'){
@@ -2396,6 +2668,7 @@ function enterApp(){
 function boot(){
   renderNav();
   switchView('today');
+  applyBigFont();
   showSplash();
 }
 document.addEventListener('keydown',function(e){
