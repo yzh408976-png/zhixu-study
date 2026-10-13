@@ -68,9 +68,28 @@
   }
 
   /**
+   * 静态托管检测（GitHub Pages / Gitee Pages / 本地 file:// 直开）。
+   * 这些环境没有后端，直接进入匿名模式，避免无谓的 404 请求。
+   */
+  function isStaticHosting() {
+    try {
+      var h = location.hostname || '';
+      return /\.github\.io$/i.test(h) || /\.gitee\.io$/i.test(h) || location.protocol === 'file:';
+    } catch (e) { return false; }
+  }
+
+  /**
    * 启动时调用一次，确认是否已登录。
    */
   function bootstrap() {
+    if (isStaticHosting()) {
+      // 纯静态托管：无后端可用，跳过探测，直接匿名模式
+      state.ready = true;
+      setTimeout(function () {
+        document.dispatchEvent(new CustomEvent('zhixu:cloud-ready', { detail: { user: null } }));
+      }, 0);
+      return Promise.resolve();
+    }
     return request('/api/auth/me')
       .then(function (j) {
         if (j && j.ok && j.data && j.data.user) {
@@ -248,6 +267,8 @@
   window.ZhixuCloud = {
     get user() { return state.user; },
     get ready() { return state.ready; },
+    /** 是否运行在无后端的静态托管环境（GitHub Pages 等） */
+    get isStatic() { return isStaticHosting(); },
     login: login,
     register: register,
     logout: logout,

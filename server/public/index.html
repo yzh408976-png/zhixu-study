@@ -6,7 +6,7 @@
 <title>云帆 · AI 学习领航引擎</title>
 <meta name="description" content="基于认知科学与动机心理学的学习任务编排系统，面向期末、考研、考公复习">
 <!-- 云适配客户端：登录态、API 调用、离线降级。永远可用。 -->
-<script src="/api-client.js"></script>
+<script src="api-client.js"></script>
 <link rel="preconnect" href="https://fonts.loli.net">
 <link href="https://fonts.loli.net/css2?family=Noto+Sans+SC:wght@400;500;700&family=Noto+Serif+SC:wght@600;700;900&display=swap" rel="stylesheet">
 <style>
@@ -2725,6 +2725,11 @@ var cloudMode='login';  // login | register
 function renderCloudEntry(){
   var box=$('#spCloud');
   if(!box)return;
+  // 纯静态托管（GitHub Pages / 本地直开）：无后端，不显示云入口
+  if(window.ZhixuCloud&&window.ZhixuCloud.isStatic){
+    box.innerHTML='<span style="opacity:.7">📴 单机演示版 · 数据仅存本机，无需登录</span>';
+    return;
+  }
   var u=window.ZhixuCloud&&window.ZhixuCloud.user;
   if(u){
     box.innerHTML='<span class="cloud-tag">☁️ '+esc(u.nickname||u.email)+'</span>'+

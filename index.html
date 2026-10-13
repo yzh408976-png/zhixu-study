@@ -5,6 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>云帆 · AI 学习领航引擎</title>
 <meta name="description" content="基于认知科学与动机心理学的学习任务编排系统，面向期末、考研、考公复习">
+<!-- 云适配客户端：登录态、API 调用、离线降级。永远可用。 -->
+<script src="api-client.js"></script>
 <link rel="preconnect" href="https://fonts.loli.net">
 <link href="https://fonts.loli.net/css2?family=Noto+Sans+SC:wght@400;500;700&family=Noto+Serif+SC:wght@600;700;900&display=swap" rel="stylesheet">
 <style>
@@ -540,6 +542,30 @@ body.bigfont{zoom:1.16}
   .ob-type-grid{grid-template-columns:1fr}
   .stamp{display:none}
 }
+
+/* 云端账号切换入口（启动页） */
+.sp-cloud{margin-top:14px;font-size:13px;color:#7b6a4a;display:flex;justify-content:center;gap:10px;align-items:center;flex-wrap:wrap}
+.sp-cloud .cloud-link{cursor:pointer;text-decoration:underline;color:#8a5a2b;font-weight:600;background:none;border:none;font-size:13px;padding:0}
+.sp-cloud .cloud-link:hover{color:#5d3a18}
+.sp-cloud .cloud-tag{display:inline-flex;align-items:center;gap:5px;padding:3px 9px;background:rgba(138,90,43,.1);border-radius:11px;color:#5d3a18}
+
+/* 云端登录 modal */
+#cloudModal{position:fixed;inset:0;z-index:200;display:flex;align-items:center;justify-content:center;padding:20px}
+#cloudModal.hide{display:none}
+#cloudModal .modal-mask{position:absolute;inset:0;background:rgba(35,39,47,.55);backdrop-filter:blur(2px)}
+#cloudModal .modal-card{position:relative;background:var(--card);border-radius:18px;padding:28px 32px;max-width:380px;width:100%;box-shadow:0 30px 60px rgba(0,0,0,.2)}
+#cloudModal .modal-title{font-size:20px;font-weight:700;color:var(--ink)}
+#cloudModal .modal-sub{margin-top:8px;font-size:13px;color:#7b6a4a;line-height:1.6}
+.cloud-tabs{display:flex;gap:6px;margin:18px 0 14px;border-bottom:1px solid #ece2cc;padding-bottom:8px}
+.cloud-tab{background:none;border:none;font-size:14px;color:#7b6a4a;padding:6px 14px;border-radius:8px;cursor:pointer}
+.cloud-tab.active{background:var(--paper);color:var(--ink);font-weight:700}
+.cloud-form label{display:block;font-size:12px;color:#7b6a4a;margin-bottom:10px}
+.cloud-form input{width:100%;margin-top:4px;padding:9px 11px;font-size:14px;border:1px solid #ddd;border-radius:8px;background:#fff;color:var(--ink);box-sizing:border-box}
+.cloud-form input:focus{outline:2px solid var(--accent,#8a5a2b);outline-offset:0}
+.cloud-form .cloud-msg{min-height:18px;font-size:12px;color:#c0392b;margin-top:-4px;margin-bottom:6px}
+.cloud-form .btn{margin-top:6px;width:100%}
+.cloud-form .btn-ghost{margin-top:6px;width:100%;font-size:12px}
+#cloudModal .modal-x{position:absolute;top:10px;right:14px;background:none;border:none;font-size:24px;color:#aaa;cursor:pointer;line-height:1}
 </style>
 </head>
 <body>
@@ -558,9 +584,32 @@ body.bigfont{zoom:1.16}
       <span class="sp-chip">公益 · 核心功能永久免费</span>
     </div>
     <button class="btn btn-primary sp-enter" data-act="enter-app">进入系统</button>
-    
+    <div class="sp-cloud" id="spCloud"></div>
   </div>
 </div>
+
+<!-- 云端账号登录 modal -->
+<div id="cloudModal" class="hide">
+  <div class="modal-mask" data-act="cloud-close"></div>
+  <div class="modal-card">
+    <div class="modal-title" id="cloudModalTitle">云端账号</div>
+    <div class="modal-sub" id="cloudModalSub">登录后你的学习数据将跨设备同步，旧数据可一键迁移。</div>
+    <div class="cloud-tabs">
+      <button class="cloud-tab sel" data-act="cloud-tab" data-v="login">登录</button>
+      <button class="cloud-tab" data-act="cloud-tab" data-v="register">注册</button>
+    </div>
+    <div class="cloud-form">
+      <label>邮箱<input id="cloudEmail" type="email" autocomplete="email" placeholder="you@example.com"></label>
+      <label>昵称<input id="cloudNick" type="text" maxlength="20" placeholder="仅注册时填写" class="hide"></label>
+      <label>密码<input id="cloudPass" type="password" autocomplete="current-password" placeholder="至少 6 位"></label>
+      <div class="cloud-msg" id="cloudMsg"></div>
+      <button class="btn btn-primary" id="cloudSubmit" data-act="cloud-submit">登录</button>
+      <button class="btn btn-ghost" id="cloudMigrate" data-act="cloud-migrate">登录后迁移本地数据到云端</button>
+    </div>
+    <button class="modal-x" data-act="cloud-close" aria-label="关闭">×</button>
+  </div>
+</div>
+
 <div id="auth" class="hide"></div>
 <div id="app">
   <aside id="sidebar">
@@ -2262,6 +2311,12 @@ document.addEventListener('click',function(e){
   if(act==='del-account'){deleteAccount();return}
   if(act==='show-auth'){showAuth('login');return}
   if(act==='enter-app'){enterApp();return}
+  if(act==='cloud-switch'||act==='cloud-open'){openCloudModal();return}
+  if(act==='cloud-close'){closeCloudModal();return}
+  if(act==='cloud-tab'){setCloudMode(el.getAttribute('data-v'));return}
+  if(act==='cloud-submit'){cloudSubmit();return}
+  if(act==='cloud-migrate'){cloudMigrate();return}
+  if(act==='cloud-logout'){cloudLogout();return}
   if(act==='ai-config'){openAIConfig();return}
   if(act==='save-ai'){
     var ep=$('#aiEp').value.trim(),ak=$('#aiKey').value.trim(),md=$('#aiModel').value.trim();
@@ -2664,9 +2719,93 @@ function enterApp(){
   if(!state.onboarded)setTimeout(openOnboarding,380);
 }
 
+/* ================= 云端账号（可选层） ================= */
+var cloudMode='login';  // login | register
+
+function renderCloudEntry(){
+  var box=$('#spCloud');
+  if(!box)return;
+  // 纯静态托管（GitHub Pages / 本地直开）：无后端，不显示云入口
+  if(window.ZhixuCloud&&window.ZhixuCloud.isStatic){
+    box.innerHTML='<span style="opacity:.7">📴 单机演示版 · 数据仅存本机，无需登录</span>';
+    return;
+  }
+  var u=window.ZhixuCloud&&window.ZhixuCloud.user;
+  if(u){
+    box.innerHTML='<span class="cloud-tag">☁️ '+esc(u.nickname||u.email)+'</span>'+
+      '<button class="cloud-link" data-act="cloud-switch">切换账号</button>';
+  }else{
+    box.innerHTML='<span style="opacity:.75">当前：本地试用 · 数据仅存本机</span>'+
+      '<button class="cloud-link" data-act="cloud-switch">☁️ 启用云同步</button>';
+  }
+}
+
+function openCloudModal(){
+  var m=$('#cloudModal');if(!m)return;
+  m.classList.remove('hide');
+  setCloudMode('login');
+  var email=$('#cloudEmail'),pass=$('#cloudPass'),nick=$('#cloudNick'),msg=$('#cloudMsg');
+  if(email)email.value='';if(pass)pass.value='';if(nick)nick.value='';
+  if(msg)msg.textContent='';
+  setTimeout(function(){ if(email) email.focus(); },60);
+}
+function closeCloudModal(){
+  var m=$('#cloudModal');if(m)m.classList.add('hide');
+}
+function setCloudMode(m){
+  cloudMode=m;
+  var nick=$('#cloudNick'),msg=$('#cloudMsg'),sub=$('#cloudModalSub'),btn=$('#cloudSubmit');
+  if(nick)nick.classList.toggle('hide',m!=='register');
+  if(btn)btn.textContent=m==='register'?'注册并登录':'登录';
+  if(sub)sub.textContent=m==='register'?'注册成功后自动登录；本地数据可在登录后一键迁移。':'登录后你的学习数据将跨设备同步，旧数据可一键迁移。';
+  var tabs=document.querySelectorAll('#cloudModal .cloud-tab');
+  tabs.forEach(function(t){t.classList.toggle('sel',t.getAttribute('data-v')===m);t.classList.toggle('active',t.getAttribute('data-v')===m);});
+  if(msg)msg.textContent='';
+}
+function cloudSubmit(){
+  var email=$('#cloudEmail').value.trim();
+  var pass=$('#cloudPass').value;
+  var nick=$('#cloudNick').value.trim();
+  var msg=$('#cloudMsg');
+  if(!email||!pass){msg.textContent='请输入邮箱和密码';return}
+  if(cloudMode==='register'&&!nick){msg.textContent='请填写昵称';return}
+  if(cloudMode==='register'&&pass.length<6){msg.textContent='密码至少 6 位';return}
+  var btn=$('#cloudSubmit');
+  btn.disabled=true;btn.textContent=cloudMode?'注册中…':'登录中…';
+  var p=cloudMode==='register'
+    ? window.ZhixuCloud.register(email,pass,nick)
+    : window.ZhixuCloud.login(email,pass);
+  p.then(function(){
+    closeCloudModal();
+    renderCloudEntry();
+    toast(cloudMode==='register'?'注册成功 ☁️ 已开启云端备份':'登录成功 ☁️ 数据将自动备份');
+  }).catch(function(e){
+    msg.textContent=(e&&e.message)||'登录失败';
+  }).then(function(){
+    btn.disabled=false;btn.textContent=cloudMode==='register'?'注册并登录':'登录';
+  });
+}
+function cloudMigrate(){
+  if(!window.ZhixuCloud||!window.ZhixuCloud.user){toast('请先登录');return}
+  toast('正在迁移本地数据到云端…');
+  window.ZhixuCloud.migrate().then(function(r){
+    toast('已迁移 '+r.migrated+' 条记录到云端');
+  }).catch(function(e){
+    toast('迁移失败：'+(e&&e.message||'未知错误'));
+  });
+}
+function cloudLogout(){
+  if(!window.ZhixuCloud)return;
+  if(!confirm('确定要退出云端登录吗？本地数据仍保留。'))return;
+  window.ZhixuCloud.logout().then(function(){renderCloudEntry();toast('已退出云端');});
+}
+// 监听云适配客户端的就绪 / 登录事件
+document.addEventListener('zhixu:cloud-ready',function(){renderCloudEntry();});
+
 /* ================= 启动 ================= */
 function boot(){
   renderNav();
+  renderCloudEntry();
   switchView('today');
   applyBigFont();
   showSplash();
