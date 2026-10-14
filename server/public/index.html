@@ -300,7 +300,8 @@ input:focus{border-color:var(--cinnabar)}
 .cc-actions{display:flex;gap:10px;margin-top:12px;align-items:center;flex-wrap:wrap}
 .ai-out{margin-top:12px;border:1px solid var(--line);border-radius:var(--r);background:var(--paper);padding:14px 16px;font-size:13.5px;color:var(--ink);white-space:pre-wrap;display:none;line-height:1.75}
 .ai-out.show{display:block}
-.ai-out .ao-head{font-size:11.5px;color:var(--pine);font-weight:700;margin-bottom:8px;letter-spacing:.06em}
+.ai-out .ao-head{display:flex;align-items:center;gap:8px;font-size:11.5px;color:var(--pine);font-weight:700;margin-bottom:8px;letter-spacing:.06em}
+.ai-out .ao-head .ao-badge{margin-left:auto;font-size:10.5px;font-weight:700;letter-spacing:.06em;color:#8a5a1a;background:#FBF1DA;border:1px solid #E7D3A6;border-radius:6px;padding:2px 8px;white-space:nowrap}
 .ai-out .ao-err{color:var(--cinnabar-deep)}
 .ai-note{font-size:12px;color:var(--ink-faint);margin-top:10px;line-height:1.6}
 .thinking{display:inline-flex;gap:5px;align-items:center;padding:4px 0}
@@ -1898,14 +1899,36 @@ var AI_TASKS={
     sub:'用大白话告诉 AI 你的复习现状（还剩什么、哪里头疼、感觉如何），AI 结合你的科目档案给出诊断与调整建议。',
     ph:'例：政治还剩毛中特和思修没看，选择题错得多；数学最头疼，概率论基本没动；英语阅读还行，作文没练过。',
     demo:'政治还剩毛中特和思修没看，选择题错得多；数学最头疼，概率论基本没动；英语阅读还行，作文没练过。',
-    build:function(v){return '学生自述：'+v+'\n请给出：1）学情诊断（2-3句）；2）科目档案调整建议（各科掌握度/喜好度应如何调整，说明原因）；3）一句行动指令。'}
+    build:function(v){
+      var e=exec7(),m=mood7(),ctx='近7日执行：';
+      if(e.planned)ctx+='完成率 '+e.rate+'%（'+e.done+'/'+e.planned+' 个任务块），峰值攻坚完成 '+e.peakDone+'/'+e.peakPlanned+' 次，连续打卡 '+e.streak+' 天。';
+      else ctx+='暂无完成记录。';
+      ctx+=m.cnt?('近7日状态：情绪打卡 '+m.cnt+' 天，平均 '+m.avg+'/5。'):'近7日状态：暂无情绪打卡。';
+      return '学生自述：'+v+'\n'+ctx+'\n请给出：1）学情诊断（2-3句，结合上述执行数据指出模式，例如某类任务总在精力低谷时段完不成、或完成率与情绪曲线同步下滑）；2）科目档案调整建议（各科掌握度/喜好度应如何调整，说明原因）；3）一句行动指令。';
+    }
   },
   review:{
     title:'每日复盘',en:'AI Reflection',
     sub:'睡前把今天的完成情况和感受丢给 AI，它帮你浓缩成三行复盘，并指出明日最重要的一件事。',
     ph:'例：今天数学攻坚块只完成一半，下午犯困效率低；英语开场很顺；政治错题比昨天少。',
     demo:'今天数学攻坚块只完成一半，下午犯困效率低；英语开场很顺；政治错题比昨天少。',
-    build:function(v){return '今日情况：'+v+'\n请生成：1）三行复盘（每行不超过20字）；2）明日最重要的一件事（不超过30字，注明依据的科学原理）。'}
+    build:function(v){
+      var d=today(),plan=state.plans[d],ctx;
+      if(plan){
+        var bs=plan.sched.filter(function(x){return x.type}),ds=doneSet(d);
+        var planned=[],actual=[],miss=[],doneN=0,i;
+        for(i=0;i<bs.length;i++){
+          var nm=TYPES[bs[i].type].label+'('+nameOf(bs[i].subjectId)+')';
+          planned.push(nm);
+          var ok=ds.has(bs[i].id);
+          if(ok)doneN++;
+          actual.push(nm+(ok?'✓':'✗'));
+          if(!ok)miss.push(nm);
+        }
+        ctx='今日计划：'+planned.join(' → ')+'\n实际完成：'+actual.join('  ')+'\n完成率 '+doneN+'/'+bs.length+(miss.length?('，未完成：'+miss.join('、')):'，全部完成')+'\n';
+      }else{ctx='今日尚未生成时表。\n'}
+      return ctx+'用户补充：'+(v||'（无）')+'\n请生成：1）三行复盘（每行不超过20字）；2）明日最重要的一件事（不超过30字，注明依据的科学原理）。';
+    }
   },
   advise:{
     title:'编排顾问',en:'AI Scheduler Advisor',
@@ -1914,6 +1937,30 @@ var AI_TASKS={
     build:function(){return profileDigest()+'\n请：1）用2-3句向学生解释今日时表为何这样排（引用具体科学原理）；2）指出1-2个可优化点。'}
   }
 };
+/* 近 7 日执行统计：完成率 / 连续天数 / 逐块完成情况 */
+function exec7(){
+  var d=today(),planned=0,done=0,days=0,peakPlanned=0,peakDone=0,k,j;
+  for(k=0;k<7;k++){
+    var dd=addDays(d,-k),pl=state.plans[dd];
+    if(!pl)continue;
+    var bs=pl.sched.filter(function(x){return x.type});
+    if(!bs.length)continue;
+    days++;planned+=bs.length;
+    var ds=doneSet(dd);
+    for(j=0;j<bs.length;j++){
+      var ok=ds.has(bs[j].id);
+      if(ok)done++;
+      if(bs[j].type==='peak'){peakPlanned++;if(ok)peakDone++}
+    }
+  }
+  return {planned:planned,done:done,days:days,rate:planned?Math.round(done/planned*100):0,peakPlanned:peakPlanned,peakDone:peakDone,streak:(state.streak&&state.streak.n)||0};
+}
+/* 近 7 日情绪统计 */
+function mood7(){
+  var d=today(),tot=0,cnt=0,k;
+  for(k=0;k<7;k++){var mm=state.moods[addDays(d,-k)];if(mm&&mm.score){tot+=mm.score;cnt++}}
+  return {avg:cnt?Math.round(tot/cnt*10)/10:0,cnt:cnt};
+}
 function profileDigest(){
   var d=today();
   var lines=state.subjects.map(function(s){
@@ -1924,7 +1971,69 @@ function profileDigest(){
     pl='今日时表：'+plan.sched.filter(function(x){return x.type}).map(function(x){return TYPES[x.type].label+'('+nameOf(x.subjectId)+')'}).join(' → ');
   }else{pl='今日尚未生成时表'}
   var p=state.profile||{};
-  return '学生档案：'+(lines.join('；')||'暂无科目')+'。'+pl+'。作息：'+(p.wake||'07:30')+'起床，每日学习'+(p.dailyHours||8)+'小时，'+({morning:'晨型',evening:'夜型',balanced:'均衡型'}[p.chronotype||'balanced'])+'精力。';
+  var e=exec7(),m=mood7();
+  var exec='';
+  if(e.planned){
+    exec='近7日执行：有计划的 '+e.days+' 天共 '+e.planned+' 个任务块，完成 '+e.done+' 个（完成率 '+e.rate+'%）';
+    if(e.peakPlanned)exec+='；其中「峰值攻坚」块 '+e.peakPlanned+' 次完成 '+e.peakDone+' 次';
+    exec+='；当前连续打卡 '+e.streak+' 天。';
+  }else{
+    exec='近7日执行：暂无完成记录。';
+  }
+  var state7=m.cnt?('近7日状态：有 '+m.cnt+' 天情绪打卡，平均 '+m.avg+'/5。'):'近7日状态：暂无情绪打卡记录。';
+  return '学生档案：'+(lines.join('；')||'暂无科目')+'。'+pl+'。'+exec+state7+'作息：'+(p.wake||'07:30')+'起床，每日学习'+(p.dailyHours||8)+'小时，'+({morning:'晨型',evening:'夜型',balanced:'均衡型'}[p.chronotype||'balanced'])+'精力。';
+}
+/* 内置示例输出：未接入大模型时按真实学情动态拼装，保证演示环境不死锁 */
+function mockAI(f,inp){
+  var d=today(),p=state.profile||{};
+  var subs=state.subjects.slice();
+  var weak=subs.slice().sort(function(a,b){return a.mastery-b.mastery})[0];
+  var strong=subs.slice().sort(function(a,b){return (b.preference+b.mastery)-(a.preference+a.mastery)})[0];
+  var e=exec7(),m=mood7(),plan=state.plans[d];
+  var blocks=plan?plan.sched.filter(function(x){return x.type}):[];
+  var mark='〔内置示例 · 未接入大模型〕\n\n';
+  if(f==='diagnose'){
+    var s=mark+'学情诊断\n';
+    if(weak)s+=weak.name+' 掌握度 '+weak.mastery+'/5 为全科最低、距考试仅 '+diffDays(d,weak.examDate)+' 天，是当前最大的时间风险敞口；';
+    if(e.planned)s+='近 7 日完成率 '+e.rate+'%，'+(e.rate<70?'执行端比知识端更值得先解决——不是不会，是先没做完。':'执行节奏稳定，可把腾出的时间加码到薄弱科目。');
+    else s+='目前还没有完成记录，先跑通一天、拿到第一个完成率数字，比空想计划更有用。';
+    s+='\n\n档案调整建议\n';
+    if(weak)s+='· '+weak.name+'：难度 '+weak.difficulty+'/5 可上调 1 档，让它在时间配比里拿到更高权重；';
+    if(strong)s+='\n· '+strong.name+'：喜好 '+strong.preference+'/5 偏高，可略降 1 档，避免挤占薄弱科目的课时；';
+    s+='\n· 建议把每日学习时长从 '+(p.dailyHours||8)+' 小时先降到 '+Math.max(3,(p.dailyHours||8)-2)+' 小时，用两周把完成率拉过 80% 再加量（渐进原则）。';
+    s+='\n\n行动指令\n今天先用 25 分钟，只做'+(weak?weak.name:'最弱科目')+'的一道核心题型——不求做完，只求把「不会」变成「卡在哪一步」。';
+    return s;
+  }
+  if(f==='review'){
+    var s2=mark;
+    if(blocks.length){
+      var ds=doneSet(d),planned=[],actual=[],miss=[],doneN=0,i;
+      for(i=0;i<blocks.length;i++){
+        var nm=TYPES[blocks[i].type].label+'('+nameOf(blocks[i].subjectId)+')';
+        planned.push(nm);
+        var ok=ds.has(blocks[i].id);
+        if(ok)doneN++;
+        actual.push(nm+(ok?'✓':'✗'));
+        if(!ok)miss.push(nm);
+      }
+      s2+='今日计划：'+planned.join(' → ')+'\n实际完成：'+actual.join('  ')+'\n完成率 '+doneN+'/'+blocks.length+(miss.length?('，未完成：'+miss.join('、')):'，全部完成 👏')+'\n\n';
+    }else{s2+='今日尚未生成时表。\n\n'}
+    s2+='三行复盘\n';
+    s2+='1. '+(blocks.length?('今天计划 '+blocks.length+' 块，完成 '+doneSet(d).size+' 块'):'今天没有生成时表，明天从设置里一键生成')+'\n';
+    s2+='2. 最耗精力的「峰值攻坚」——'+(e.peakPlanned?('近 7 日 '+e.peakPlanned+' 次里完成了 '+e.peakDone+' 次'):'把它放在精力峰值时段成功率最高')+'\n';
+    s2+='3. '+(m.cnt?('近 7 日情绪均分 '+m.avg+'/5，'+(m.avg<3?'先把睡眠和情绪补回来，再谈加量':'状态在线，节奏可以再稳一点')):'记得给自己打一次情绪卡，状态也是数据')+'\n\n';
+    s2+='明日最重要的一件事\n把「首胜开场」留给'+(strong?strong.name:'你最擅长的科目')+'，用一次低门槛的成功启动一天，为'+(weak?weak.name:'硬骨头')+'蓄力（依据：自我效能感理论）。';
+    return s2;
+  }
+  var s3=mark+'今日时表为什么这样排\n';
+  s3+='① 以'+(strong?strong.name:'擅长科目')+'开场，用低门槛成功感启动一天（自我效能感）；';
+  s3+='② 把最重的攻坚块对齐你的精力峰值——'+(p.chronotype==='evening'?'你是夜型，攻坚后移':p.chronotype==='morning'?'你是晨型，攻坚在前':'你是均衡型，攻坚在上午峰值')+'（认知负荷理论）；';
+  s3+='③ 用闭卷自测替代重读（测试效应），多科混合出题训练判断力（交错练习），并按 3/7 天节点回看（间隔重复）；';
+  s3+='④ 结尾留一道悬念题，借蔡加尼克效应让明天更易切入。\n\n可优化点\n';
+  if(e.planned&&e.rate<75)s3+='· 近 7 日完成率 '+e.rate+'%'+(e.peakPlanned?('，攻坚块 '+e.peakDone+'/'+e.peakPlanned):'')+' 偏低：建议把每日学习时长从 '+(p.dailyHours||8)+' 小时下调到 '+Math.max(3,(p.dailyHours||8)-2)+' 小时，先把完成率拉起来，再谈加量。\n';
+  else s3+='· 完成率健康，可把'+(weak?weak.name:'薄弱科目')+'的复习块再提前 1 个时段，趁精力更足。\n';
+  s3+='· 若某块总是完不成，把它拆分到两个时段，而不是整块放弃（渐进原则）。';
+  return s3;
 }
 function renderCoach(){
   var view=$('#view-coach');
@@ -1992,15 +2101,22 @@ function callLLM(sys,user,cb,err){
 }
 function runAI(f){
   var t=AI_TASKS[f];if(!t)return;
-  if(!state.aiConfig||!state.aiConfig.key){toast('请先配置 AI 接口');openAIConfig();return}
+  var out=$('#aiOut-'+f);
+  if(!out)return;
   var inp='';
   if(t.ph){
     var ta=$('#aiIn-'+f);
     inp=(ta&&ta.value?ta.value:'').trim();
-    if(!inp){toast('先写下你的情况，或点「填入示例」');return}
   }
-  var out=$('#aiOut-'+f);
-  if(!out)return;
+  /* 未接入大模型（含静态演示环境）：不发请求，直接渲染按真实学情动态拼装的示例输出 */
+  if(!state.aiConfig||!state.aiConfig.key){
+    if(t.ph&&!inp&&t.demo){inp=t.demo;var ta2=$('#aiIn-'+f);if(ta2)ta2.value=t.demo}
+    out.classList.add('show');
+    out.innerHTML='<div class="ao-head">AI 教练<span class="ao-badge">示例输出</span></div>'+esc(mockAI(f,inp))+
+      '<div class="ai-note" style="margin-top:12px">以上为内置示例（未接入大模型）。<button class="cloud-link" data-act="ai-config">配置 AI 接口</button> 后，模型会结合你的真实学情数据生成个性化分析。</div>';
+    return;
+  }
+  if(t.ph&&!inp){toast('先写下你的情况，或点「填入示例」');return}
   out.classList.add('show');
   out.innerHTML='<div class="ao-head">AI 教练思考中</div><div class="thinking"><i></i><i></i><i></i></div>';
   callLLM(AI_SYS,t.build(inp),function(txt){
@@ -2074,6 +2190,7 @@ function openWhyModal(){
     var it=items[i];
     h+='<div class="why-item"><span class="why-n">'+it[0]+'</span><div><b>'+it[1]+'</b><p>'+it[2]+' <span style="color:var(--pine)">（'+SCI[it[3]].name+'）</span></p></div></div>';
   }
+  h+='<p class="muted" style="font-size:12px;line-height:1.75;border-top:1px dashed var(--line);padding-top:12px;margin-top:8px">诚实说明 — 以上六块的<b>顺序与原则</b>均有同行评议研究支撑；而各块的<b>时长配比</b>（如「峰值攻坚」权重 2.6、交错练习 2.0 等）与科目权重系数，是云帆为把课表落到具体分钟而设定的<b>启发式参数</b>，用于分配时间，并非上述论文的直接结论。它们会随你的执行反馈调整——我们引用研究支撑「怎么排」，但不会把自定的数值冒充成科学定律。</p>';
   h+='</div><div class="m-actions"><button class="btn btn-ghost" data-act="close-modal">关闭</button>';
   if(!plan)h+='<button class="btn btn-primary" data-act="gen-today">生成今日时表</button>';
   h+='</div>';
