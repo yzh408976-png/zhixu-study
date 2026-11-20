@@ -27,6 +27,7 @@
   var state = {
     user: null,
     ready: false,
+    noBackend: false,  // 运行时探测：此环境没有 /api 后端（未知域名的静态托管）
     pending: []   // 离线时排队，恢复后批量发送
   };
 
@@ -68,13 +69,17 @@
   }
 
   /**
-   * 静态托管检测（GitHub Pages / Gitee Pages / 本地 file:// 直开）。
+   * 静态托管检测（GitHub Pages / Gitee Pages / Qoder Sites / 本地 file:// 直开）。
    * 这些环境没有后端，直接进入匿名模式，避免无谓的 404 请求。
+   * 对未知域名，由 bootstrap() 的运行时探测兜底：/api/auth/me 返回 404 或网络错误
+   * 时置位 state.noBackend，同样进入单机模式。
    */
   function isStaticHosting() {
     try {
       var h = location.hostname || '';
-      return /\.github\.io$/i.test(h) || /\.gitee\.io$/i.test(h) || location.protocol === 'file:';
+      if (location.protocol === 'file:') return true;
+      return /\.github\.io$/i.test(h) || /\.gitee\.io$/i.test(h) ||
+             /(^|\.)qoder\./i.test(h) || state.noBackend;
     } catch (e) { return false; }
   }
 
@@ -97,8 +102,12 @@
           writeCache(j.data.user);
         }
       })
-      .catch(function () {
-        // 401 或网络错误：当匿名处理
+      .catch(function (e) {
+        // 401：后端存在、只是未登录，保留云功能入口。
+        // 404 / 405 / 网络错误：此环境没有后端（如未知域名的静态托管），标记为单机模式。
+        if (e && (e.status === 404 || e.status === 405 || e.status === undefined)) {
+          state.noBackend = true;
+        }
       })
       .then(function () {
         state.ready = true;

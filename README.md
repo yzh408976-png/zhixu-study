@@ -28,6 +28,10 @@
 > 不想下载？直接访问在线演示版：**https://yzh408976-png.github.io/zhixu-study/**
 > （GitHub Pages 静态托管，纯单机模式，数据仅存本机浏览器）
 
+**发布到 Qoder Sites 等静态托管**：`dist/` 目录即为可直接发布的成品（index.html + api-client.js），
+在 Qoder CLI 会话中说「把 dist 发布为站点」并设为公开即可获得公网链接。前端会自动识别无后端环境，
+进入单机模式并隐藏云同步入口；AI 三功能以「示例输出」兜底，无需任何配置。
+
 ### 2. 跑全栈版（带账号体系 + 数据云同步）
 
 ```bash
@@ -59,6 +63,7 @@ docker run -d -p 3000:3000 \
 zhixu-study/
 ├── index.html                    # 单文件前端（~150 KB，民生功能完整；亦是 Pages 部署入口）
 ├── api-client.js                 # 云适配客户端（登录态 / API 调用 / 离线降级）
+├── dist/                         # 纯静态托管一键发布目录（Qoder Sites 等），由 npm run sync 自动生成
 ├── LICENSE                       # MIT
 ├── server/                       # Next.js 14 全栈后端
 │   ├── app/                      #   API 路由 + 页面
